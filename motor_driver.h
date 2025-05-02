@@ -12,10 +12,11 @@
 #define LEFT_DIRECTION 27
 #define LEFT_PWM 5
 
+#define MIN_PWM 20
 #define MAX_PWM 220
 #endif 
 
-#define GRABBER
+#ifdef GRABBER
 
 #define GRABBER_DIRECTION 22
 #define GRABBER_PWM 3
@@ -28,4 +29,4 @@ void initMotorController();
 void setMotorSpeed(int i, int spd);
 void setMotorSpeeds(int leftSpeed, int rightSpeed);
 
-void setGrabberSpeed (int speed);
+void setGrabberSpeed (int spd);

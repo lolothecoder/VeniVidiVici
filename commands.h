@@ -10,6 +10,7 @@
 #define PIN_MODE       'c'
 #define DIGITAL_READ   'd'
 #define READ_ENCODERS  'e'
+#define BATTERY_LEVEL  'f'
 #define GRABBER_RAW_PWM'g'
 #define MOTOR_SPEEDS   'm'
 #define MOTOR_RAW_PWM  'o'

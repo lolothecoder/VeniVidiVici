@@ -235,6 +235,8 @@ int runCommand() {
     lastGrabberCommand = millis();
     setGrabberSpeed(arg1);
     Serial.println("OK"); 
+  case BATTERY_LEVEL:
+    //code here
   case UPDATE_PID:
     while ((str = strtok_r(p, ":", &p)) != '\0') {
        pid_args[i] = atoi(str);

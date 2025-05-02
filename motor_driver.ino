@@ -8,63 +8,20 @@
    *************************************************************/
 
 #ifdef USE_BASE
-   
-#ifdef POLOLU_VNH5019
-  /* Include the Pololu library */
-  #include "DualVNH5019MotorShield.h"
 
-  /* Create the motor driver object */
-  DualVNH5019MotorShield drive;
-  
-  /* Wrap the motor driver initialization */
+#ifdef ESCON_MAXON
   void initMotorController() {
-    drive.init();
-  }
-
-  /* Wrap the drive motor set speed function */
-  void setMotorSpeed(int i, int spd) {
-    if (i == LEFT) drive.setM1Speed(spd);
-    else drive.setM2Speed(spd);
-  }
-
-  // A convenience function for setting both motor speeds
-  void setMotorSpeeds(int leftSpeed, int rightSpeed) {
-    setMotorSpeed(LEFT, leftSpeed);
-    setMotorSpeed(RIGHT, rightSpeed);
-  }
-#elif defined POLOLU_MC33926
-  /* Include the Pololu library */
-  #include "DualMC33926MotorShield.h"
-
-  /* Create the motor driver object */
-  DualMC33926MotorShield drive;
-  
-  /* Wrap the motor driver initialization */
-  void initMotorController() {
-    drive.init();
-  }
-
-  /* Wrap the drive motor set speed function */
-  void setMotorSpeed(int i, int spd) {
-    if (i == LEFT) drive.setM1Speed(spd);
-    else drive.setM2Speed(spd);
-  }
-
-  // A convenience function for setting both motor speeds
-  void setMotorSpeeds(int leftSpeed, int rightSpeed) {
-    setMotorSpeed(LEFT, leftSpeed);
-    setMotorSpeed(RIGHT, rightSpeed);
-  }
-#elif defined ESCON_MAXON
-  void initMotorController() {
-    digitalWrite(RIGHT_MOTOR_ENABLE, HIGH);
-    digitalWrite(LEFT_MOTOR_ENABLE, HIGH);
+    digitalWrite(RIGHT_ENABLE, HIGH);
+    digitalWrite(LEFT_ENABLE, HIGH);
   }
   
   void setMotorSpeed(int i, int spd) {
     unsigned char reverse = 0;
-  
-    if (spd < 0)
+    
+    if (abs(spd) < MIN_PWM){
+      spd = MIN_PWM;
+    }
+    else if (spd < 0)
     {
       spd = -spd;
       reverse = 1;
@@ -98,12 +55,10 @@
     setMotorSpeed(LEFT, leftSpeed);
     setMotorSpeed(RIGHT, rightSpeed);
   }
-#else
-  #error A motor driver must be selected!
-#endif
 
+#endif
 #ifdef GRABBER
-  void setGrabberSpeed (int speed){
+  void setGrabberSpeed (int spd){
     unsigned char reverse = 0;
   
     if (spd < 0)
@@ -111,7 +66,7 @@
       spd = -spd;
       reverse = 1;
     }
-    if (spd > MAX_GRABBER_PWM)
+    if (spd > MAX_GRABBER_PWM){
       spd = MAX_GRABBER_PWM;
     }
 
