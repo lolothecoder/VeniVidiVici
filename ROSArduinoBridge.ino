@@ -67,6 +67,7 @@
 
    #define ESCON_MAXON
    #define GRABBER
+   #define BATTERY
 #endif
 
 //#define USE_SERVOS  // Enable use of PWM servos as defined in servos.h
@@ -89,6 +90,8 @@
 
 /* Sensor functions */
 #include "sensors.h"
+
+#include "sensors_updated.h"
 
 /* Include servo support if required */
 #ifdef USE_SERVOS
@@ -236,7 +239,7 @@ int runCommand() {
     setGrabberSpeed(arg1);
     Serial.println("OK"); 
   case BATTERY_LEVEL:
-    //code here
+    battery_level();
   case UPDATE_PID:
     while ((str = strtok_r(p, ":", &p)) != '\0') {
        pid_args[i] = atoi(str);
@@ -269,6 +272,8 @@ void setup() {
 
     pinMode(GRABBER_DIRECTION, OUTPUT);
     pinMode(GRABBER_PWM, OUTPUT);
+
+    pinMode(BATTERY_PIN, INPUT);
 
 
 // Initialize the motor controller if used */
