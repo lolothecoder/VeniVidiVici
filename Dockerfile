@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
     ros-humble-xacro \
+    ros-humble-rviz2 \
     libserial-dev \
     && rm -rf /var/lib/apt/lists/*
 

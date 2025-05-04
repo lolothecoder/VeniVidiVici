@@ -18,3 +18,6 @@ docker exec -it <CONTAINER> bash
 
 run teleop:
 ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diffbot_base_controller/cmd_vel_unstamped
+
+Put code on Arduino
+acompile ROSArduinoBridge/ && aupload ROSArduinoBridge/
