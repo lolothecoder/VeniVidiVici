@@ -99,7 +99,7 @@ public:
   void set_motor_values(int val_1, int val_2)
   {
     std::stringstream ss;
-    ss << "m " << val_1 << " " << val_2 << "\r";
+    ss << "o " << val_1 << " " << val_2 << "\r";
     send_msg(ss.str());
   }
 
