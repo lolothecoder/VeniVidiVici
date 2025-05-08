@@ -222,7 +222,6 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
 hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "write() called");
   if (!comms_.connected())
   {
     return hardware_interface::return_type::ERROR;
@@ -231,9 +230,9 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
   RCLCPP_INFO(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f",  wheel_l_.cmd,  wheel_r_.cmd);
 
-  int motor_l_counts_per_loop = wheel_l_.cmd / wheel_l_.rads_per_count / cfg_.loop_rate;
-  int motor_r_counts_per_loop = wheel_r_.cmd / wheel_r_.rads_per_count / cfg_.loop_rate;
-  comms_.set_motor_values(100, 100);
+  wheel_l_.cmd = wheel_l_.cmd * 3;
+  wheel_r_.cmd = wheel_r_.cmd * 3;
+  comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
   return hardware_interface::return_type::OK;
 }
 
