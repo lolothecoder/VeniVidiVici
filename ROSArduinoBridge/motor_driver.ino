@@ -32,11 +32,11 @@
     if (i == LEFT) { 
       if      (reverse == 0) { 
         analogWrite(LEFT_PWM, spd); 
-        digitalWrite(LEFT_DIRECTION, 0); 
+        digitalWrite(LEFT_DIRECTION, 1); 
       }
       else if (reverse == 1) { 
         analogWrite(LEFT_PWM, spd); 
-        digitalWrite(LEFT_DIRECTION, 1); 
+        digitalWrite(LEFT_DIRECTION, 0); 
       }
     }
     else /*if (i == RIGHT) //no need for condition*/ {
