@@ -36,13 +36,11 @@ COPY entrypoint.sh /entrypoint.sh
 COPY bashrc /home/${USERNAME}/.bashrc
 
 WORKDIR /root/ros_ws/src
-RUN git clone https://github.com/lolothecoder/VeniVidiVici.git
-
-WORKDIR /root/ros_ws/src
 
 
 RUN git clone https://github.com/joshnewans/serial.git
-#stuff
+ADD https://www.google.com /time.now
+WORKDIR /root/ros_ws/src
 RUN rm -rf VeniVidiVici &&\
     git clone https://github.com/lolothecoder/VeniVidiVici.git
 
@@ -50,6 +48,9 @@ WORKDIR /root/ros_ws/src/serial
 RUN git checkout 2121a37eaa1aff8ca62badc0ac8f43b87169d706 && \
     /bin/bash -c "source /opt/ros/humble/setup.bash; make" && \
     make install
+
+RUN echo 'alias ateleop="ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diffbot_base_controller/cmd_vel_unstamped"' >> ~/.bashrc
+RUN echo 'alias alaunch="ros2 launch diffdrive_arduino diffbot.launch.py"' >> ~/.bashrc
 
 WORKDIR /root/ros_ws
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; \

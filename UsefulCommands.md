@@ -8,6 +8,7 @@ source:
 source install/setup.bash
 
 launch robot:
+alaunch
 ros2 launch diffdrive_arduino diffbot.launch.py
 
 list container:
@@ -17,6 +18,7 @@ execute terminal in same container
 docker exec -it <CONTAINER> bash
 
 run teleop:
+ateleop
 ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diffbot_base_controller/cmd_vel_unstamped
 
 Put code on Arduino
@@ -24,3 +26,7 @@ acompile ROSArduinoBridge/ && aupload ROSArduinoBridge/
 
 Controlling motors through pyserial
 pyserial-miniterm -e /dev/ttyACM0 57600
+
+create new bash
+anewbash
+sudo docker exec -it $(sudo docker ps -aqf "ancestor=leshrimpkiller/vvv") bash

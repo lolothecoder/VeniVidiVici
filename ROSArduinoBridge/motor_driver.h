@@ -12,7 +12,7 @@
 #define LEFT_DIRECTION 27
 #define LEFT_PWM 5
 
-#define MIN_PWM 35
+#define MIN_PWM 25.5
 #define MAX_PWM 220
 #endif 
 
