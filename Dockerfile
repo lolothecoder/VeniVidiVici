@@ -39,7 +39,9 @@ WORKDIR /root/ros_ws/src
 RUN git clone https://github.com/lolothecoder/VeniVidiVici.git
 
 WORKDIR /root/ros_ws/src
-RUN git clone https://github.com/joshnewans/serial.git
+RUN rm -rf VeniVidiVici && \
+    git clone https://github.com/lolothecoder/VeniVidiVici.git &&\
+    git clone https://github.com/joshnewans/serial.git
 WORKDIR /root/ros_ws/src/serial
 RUN git checkout 2121a37eaa1aff8ca62badc0ac8f43b87169d706 && \
     /bin/bash -c "source /opt/ros/humble/setup.bash; make" && \

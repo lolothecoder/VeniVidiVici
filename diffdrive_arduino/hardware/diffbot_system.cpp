@@ -222,7 +222,6 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
 hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::write(
   const rclcpp::Time & /*time*/, const rclcpp::Duration & /*period*/)
 {
-   RCLCPP_INFO(this->get_logger(), "Received write command");
    RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "write() called");
   if (!comms_.connected())
   {
