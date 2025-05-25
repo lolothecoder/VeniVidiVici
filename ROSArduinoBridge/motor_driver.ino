@@ -20,11 +20,29 @@
     
     if (abs(spd) < MIN_PWM){
       spd = MIN_PWM;
+      if (i == LEFT){
+        digitalWrite(LEFT_ENABLE, LOW);
+      } else {
+        digitalWrite(RIGHT_ENABLE, LOW);
+      }
+
     }
     else if (spd < 0)
     {
+      if (i == LEFT){
+        digitalWrite(LEFT_ENABLE, HIGH);
+      } else {
+        digitalWrite(RIGHT_ENABLE, HIGH);
+      }
       spd = -spd;
       reverse = 1;
+    }
+    else{
+      if (i == LEFT){
+        digitalWrite(LEFT_ENABLE, HIGH);
+      } else {
+        digitalWrite(RIGHT_ENABLE, HIGH);
+      }
     }
     if (spd > MAX_PWM)
       spd = MAX_PWM;

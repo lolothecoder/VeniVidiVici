@@ -12,6 +12,7 @@
 #define READ_ENCODERS  'e'
 #define BATTERY_LEVEL  'f'
 #define GRABBER_RAW_PWM'g'
+#define ACTIVATE_SERVO 'h'
 #define MOTOR_SPEEDS   'm'
 #define MOTOR_RAW_PWM  'o'
 #define PING           'p'

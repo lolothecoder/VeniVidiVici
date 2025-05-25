@@ -68,6 +68,7 @@
    #define ESCON_MAXON
    #define GRABBER
    #define BATTERY
+   #define CUSTOM_SERVOS
 #endif
 
 //#define USE_SERVOS  // Enable use of PWM servos as defined in servos.h
@@ -100,6 +101,8 @@
 #endif
 
 #ifdef USE_BASE
+  #include <Servo.h>
+  #include "custom_servos.h"
   /* Motor driver function definitions */
   #include "motor_driver.h"
 
@@ -123,6 +126,7 @@
   #define AUTO_STOP_INTERVAL 2000
   long lastMotorCommand = AUTO_STOP_INTERVAL;
   long lastGrabberCommand = AUTO_STOP_INTERVAL;
+  long lastServoCommand = AUTO_STOP_INTERVAL;
 #endif
 
 /* Variable initialization */
@@ -242,6 +246,10 @@ int runCommand() {
   case BATTERY_LEVEL:
     battery_level();
     break;
+  case ACTIVATE_SERVO:
+    lastServoCommand = millis();
+    setServo(arg1, arg2);
+    break;
   case UPDATE_PID:
     while ((str = strtok_r(p, ":", &p)) != '\0') {
        pid_args[i] = atoi(str);
@@ -302,6 +310,7 @@ void setup() {
     PCICR |= (1 << PCIE1) | (1 << PCIE2);
   #endif
   initMotorController();
+  initServos();
   resetPID();
 #endif
 
@@ -377,6 +386,11 @@ void loop() {
 
   if ((millis() - lastGrabberCommand) > AUTO_STOP_INTERVAL) {;
     setGrabberSpeed(0);
+  }
+
+  if ((millis() - lastServoCommand) > AUTO_STOP_INTERVAL) {;
+    setServo(0, 0);
+    setServo(1, 0);
   }
 #endif
 
