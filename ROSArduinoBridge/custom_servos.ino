@@ -1,5 +1,5 @@
 #ifdef CUSTOM_SERVOS
-#include <Servo.h>
+
 void initServos(){
     door.attach(DOOR_PWM);
     ramp.attach(BACKRAMP_PWM);
