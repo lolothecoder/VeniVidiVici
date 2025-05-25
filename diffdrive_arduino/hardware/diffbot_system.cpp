@@ -230,8 +230,8 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
   RCLCPP_INFO(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f",  wheel_l_.cmd,  wheel_r_.cmd);
 
-  wheel_l_.cmd = wheel_l_.cmd;
-  wheel_r_.cmd = wheel_r_.cmd;
+  wheel_l_.cmd = wheel_l_.cmd * 27.62;
+  wheel_r_.cmd = wheel_r_.cmd * 27.62;
   comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
   return hardware_interface::return_type::OK;
 }
