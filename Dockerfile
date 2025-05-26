@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-twist-mux \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
+    ros-humble-rplidar-ros \
     ros-humble-xacro \
     ros-humble-rviz2 \
     libserial-dev \
