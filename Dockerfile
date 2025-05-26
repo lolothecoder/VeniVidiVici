@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-twist-mux \
     ros-humble-ros2-control \
     ros-humble-ros2-controllers \
-    ros-humble-rplidar-ros \
     ros-humble-xacro \
     ros-humble-rviz2 \
     libserial-dev \
@@ -44,6 +43,9 @@ ADD https://www.google.com /time.now
 WORKDIR /root/ros_ws/src
 RUN rm -rf VeniVidiVici &&\
     git clone https://github.com/lolothecoder/VeniVidiVici.git
+
+WORKDIR /root/ros_ws/src
+RUN git clone https://github.com/babakhani/rplidar_ros2.git
 
 WORKDIR /root/ros_ws/src/serial
 RUN git checkout 2121a37eaa1aff8ca62badc0ac8f43b87169d706 && \
