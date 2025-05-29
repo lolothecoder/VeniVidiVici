@@ -57,10 +57,6 @@ RUN echo 'alias ateleop="ros2 run teleop_twist_keyboard teleop_twist_keyboard --
 RUN echo 'alias alaunch="ros2 launch diffdrive_arduino diffbot.launch.py"' >> ~/.bashrc
 
 WORKDIR /root/ros_ws
-RUN /bin/bash -c "cp /opt/ros/humble/share/slam_toolbox/config/mapper_params_online_async.yaml \
-                  /root/ros_ws/src/veni_vid_vici_bot_one/config/"
-
-WORKDIR /root/ros_ws
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; \
     colcon build --symlink-install; \
     source install/setup.bash"
