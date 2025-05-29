@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-ros2-controllers \
     ros-humble-xacro \
     ros-humble-rviz2 \
+    ros-humble-slam-toolbox \
     libserial-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -54,6 +55,10 @@ RUN git checkout 2121a37eaa1aff8ca62badc0ac8f43b87169d706 && \
 
 RUN echo 'alias ateleop="ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diffbot_base_controller/cmd_vel_unstamped"' >> ~/.bashrc
 RUN echo 'alias alaunch="ros2 launch diffdrive_arduino diffbot.launch.py"' >> ~/.bashrc
+
+WORKDIR /root/ros_ws
+RUN /bin/bash -c "cp /opt/ros/humble/share/slam_toolbox/config/mapper_params_online_async.yaml \
+                  /root/ros_ws/src/veni_vid_vici_bot_one/config/"
 
 WORKDIR /root/ros_ws
 RUN /bin/bash -c "source /opt/ros/humble/setup.bash; \
