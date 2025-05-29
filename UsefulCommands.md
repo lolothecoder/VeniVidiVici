@@ -53,3 +53,5 @@ echo $DISPLAY
 echo $XAUTHORITY 
 
 rviz2
+
+ros2 launch slam_toolbox online_async_launch.py params_file:=./src/veni_vidi_vici_bot_one/config/mapper_params_online_async.yaml use_sim_time:=false
