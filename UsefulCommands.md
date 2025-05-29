@@ -9,7 +9,7 @@ source install/setup.bash
 
 launch robot:
 alaunch
-ros2 launch diffdrive_arduino diffbot.launch.py
+ros2 launch veni_vidi_vici_bot_one launch_robot.launch.py 
 
 list container:
 docker container ls
@@ -19,7 +19,7 @@ docker exec -it <CONTAINER> bash
 
 run teleop:
 ateleop
-ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diffbot_base_controller/cmd_vel_unstamped
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_keyboard
 
 Put code on Arduino
 acompile ROSArduinoBridge/ && aupload ROSArduinoBridge/
