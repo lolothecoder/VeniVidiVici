@@ -208,8 +208,8 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
 
   double pos_prev = wheel_l_.pos;
 
-  wheel_l_.vel = wheel_l_.cmd;
-  wheel_r_.vel = wheel_r_.cmd;
+  wheel_l_.vel = wheel_l_.cmd/27.62;
+  wheel_r_.vel = wheel_r_.cmd/27.62;
 
   RCLCPP_INFO(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
