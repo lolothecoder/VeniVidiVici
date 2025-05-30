@@ -204,17 +204,14 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
     return hardware_interface::return_type::ERROR;
   }
 
-  comms_.read_encoder_values(wheel_l_.enc, wheel_r_.enc);
-
   double delta_seconds = period.seconds();
 
   double pos_prev = wheel_l_.pos;
-  wheel_l_.pos = wheel_l_.calc_enc_angle();
-  wheel_l_.vel = (wheel_l_.pos - pos_prev) / delta_seconds;
 
-  pos_prev = wheel_r_.pos;
-  wheel_r_.pos = wheel_r_.calc_enc_angle();
-  wheel_r_.vel = (wheel_r_.pos - pos_prev) / delta_seconds;
+  wheel_l_.vel = wheel_l_.cmd;
+  wheel_r_.vel = wheel_r_.cmd;
+  wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
+  wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
 
   return hardware_interface::return_type::OK;
 }
@@ -227,8 +224,8 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
     return hardware_interface::return_type::ERROR;
   }
 
-  RCLCPP_INFO(
-    rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f",  wheel_l_.cmd,  wheel_r_.cmd);
+  //RCLCPP_INFO(
+    //rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f",  wheel_l_.cmd,  wheel_r_.cmd);
 
   wheel_l_.cmd = wheel_l_.cmd * 27.62;
   wheel_r_.cmd = wheel_r_.cmd * 27.62;

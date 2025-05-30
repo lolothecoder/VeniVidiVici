@@ -19,7 +19,7 @@ docker exec -it <CONTAINER> bash
 
 run teleop:
 ateleop
-ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/cmd_vel_keyboard
+ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/diff_cont/cmd_vel_unstamped
 
 Put code on Arduino
 acompile ROSArduinoBridge/ && aupload ROSArduinoBridge/
