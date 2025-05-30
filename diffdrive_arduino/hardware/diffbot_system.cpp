@@ -211,7 +211,7 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   wheel_l_.vel = wheel_l_.cmd;
   wheel_r_.vel = wheel_r_.cmd;
 
-  RCLCPP_DEBUG(
+  RCLCPP_INFO(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
 
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
@@ -228,7 +228,7 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
     return hardware_interface::return_type::ERROR;
   }
 
-  RCLCPP_DEBUG(
+  RCLCPP_INFO(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent speed values: %f %f",  wheel_l_.cmd,  wheel_r_.cmd);
 
   wheel_l_.cmd = wheel_l_.cmd * 27.62;
