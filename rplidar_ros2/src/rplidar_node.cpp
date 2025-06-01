@@ -341,8 +341,8 @@ void rplidar_node::publish_loop()
     return;
   }
   op_result = m_drv->ascendScanData(nodes.get(), count);
-  angle_min = deg_2_rad(29.0f);
-  angle_max = deg_2_rad(329.0f);
+  angle_min = deg_2_rad(34.0f);
+  angle_max = deg_2_rad(324.0f);
   if (op_result == RESULT_OK) {
     if (angle_compensate_) {
       const int angle_compensate_nodes_count = 360 * m_angle_compensate_multiple;
@@ -387,8 +387,8 @@ void rplidar_node::publish_loop()
     }
   } else if (op_result == RESULT_OPERATION_FAIL) {
     // All the data is invalid, just publish them
-    float angle_min = deg_2_rad(29.0f);
-    float angle_max = deg_2_rad(329.0f);
+    float angle_min = deg_2_rad(34.0f);
+    float angle_max = deg_2_rad(324.0f);
 
     publish_scan(scan_duration, std::move(nodes), count);
   }
