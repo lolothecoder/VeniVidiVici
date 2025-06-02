@@ -30,6 +30,7 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-xacro \
     ros-humble-rviz2 \
     ros-humble-slam-toolbox \
+    ros-humble-laser-filters \
     libserial-dev \
     && rm -rf /var/lib/apt/lists/*
 

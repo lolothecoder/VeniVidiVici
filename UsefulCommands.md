@@ -9,6 +9,7 @@ docker run -dit --name ros_vvv \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
   -v /home/triplev/.Xauthority:/root/.Xauthority:ro \
   -v /home/triplev/Documents/VeniVidiVici/veni_vidi_vici_bot_one:/root/ros_ws/src/veni_vidi_vici_bot_one \
+  -v /home/triplev/Documents/VeniVidiVici/rplidar_ros2:/root/ros_ws/src/rplidar_ros2 \
   -v /dev/bus/usb:/dev/bus/usb \
   leshrimpkiller/vvv:latest bash
 
@@ -48,7 +49,7 @@ ros2 run rplidar_ros rplidar_composition --ros-args -p serial_port:=/dev/ttyUSB0
 
 Run Rviz docker:
 
-ssh -X lolon@172.21.69.243
+ssh -X triplev@172.21.68.240
 
 xhost +local:root  # Allow local root user to access X server
 

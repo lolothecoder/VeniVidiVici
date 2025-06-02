@@ -1,0 +1,9 @@
+scan_filter_chain:
+  # A single filter: LaserScanAngularBoundsFilter
+  filter_chain:
+    - name: angle_bounds
+      type: laser_filters/LaserScanAngularBoundsFilter
+      params:
+        # radians: −60° = −1.047, +60° = +1.047
+        lower_angle: 1.0
+        upper_angle: 2.5

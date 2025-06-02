@@ -17,5 +17,16 @@ def generate_launch_description():
                 'inverted': False,
                 'angle_compensate': True,
             }],
+            remappings=[('/scan', '/scan_raw')]
+        ),
+        Node(
+            package='laser_filters',
+            executable='scan_filter_chain',
+            name='scan_filter_chain',
+            parameters=[{'scan_filter_chain': 'VeniVidiVici/rplidar_ros2/config/lidar_filter.yaml'}],
+            remappings=[
+                ('scan_in', 'scan_raw'),     # subscribe to raw 360° data
+                ('scan_out', 'scan')         # publish the cropped scan onto /scan
+            ]
         ),
     ])
