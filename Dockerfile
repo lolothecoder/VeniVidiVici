@@ -59,8 +59,15 @@ WORKDIR /root/ros_ws/src
 RUN git clone https://github.com/joshnewans/serial.git
 ADD https://www.google.com /time.now
 WORKDIR /root/ros_ws/src
-RUN rm -rf VeniVidiVici &&\
-    git clone https://github.com/lolothecoder/VeniVidiVici.git
+
+COPY veni_vidi_vici_bot_one /root/ros_ws/src/veni_vidi_vici_bot_one
+
+COPY rplidar_ros2 /root/ros_ws/src/rplidar_ros2
+
+COPY diffdrive_arduino /root/ros_ws/src/diffdrive_arduino
+
+COPY ROSArduinoBridge /root/ros_ws/src/ROSArduinoBridge
+
 
 WORKDIR /root/ros_ws/src/serial
 RUN git checkout 2121a37eaa1aff8ca62badc0ac8f43b87169d706 && \

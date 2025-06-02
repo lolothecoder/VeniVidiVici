@@ -1,5 +1,17 @@
 run docker image:
-sudo docker run --rm --privileged -it --net=host -v /dev/bus/usb:/dev/bus/usb  leshrimpkiller/vvv:latest bash
+docker run -dit --name ros_vvv \
+  --privileged \
+  --network host \
+  --ipc host \
+  --device /dev/video0:/dev/video0 \
+  --device /dev/ttyUSB0:/dev/ttyUSB0 \
+  -e DISPLAY=$DISPLAY \
+  -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+  -v /home/triplev/.Xauthority:/root/.Xauthority:ro \
+  -v /home/triplev/Documents/VeniVidiVici/veni_vidi_vici_bot_one:/root/ros_ws/src/veni_vidi_vici_bot_one \
+  -v /dev/bus/usb:/dev/bus/usb \
+  leshrimpkiller/vvv:latest bash
+
 
 build docker image:
 docker build -t leshrimpkiller/vvv .
@@ -15,7 +27,7 @@ list container:
 docker container ls
 
 execute terminal in same container
-docker exec -it <CONTAINER> bash
+docker exec -it ros_vvv bash
 
 run teleop:
 ateleop
@@ -55,3 +67,7 @@ echo $XAUTHORITY
 rviz2
 
 ros2 launch slam_toolbox online_async_launch.py params_file:=./src/veni_vidi_vici_bot_one/config/mapper_params_online_async.yaml use_sim_time:=false
+
+source /opt/ros/humble/setup.bash
+source ~/ros_ws/install/setup.bash
+export ROS_DOMAIN_ID=5
