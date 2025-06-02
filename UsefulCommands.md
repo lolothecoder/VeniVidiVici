@@ -12,6 +12,9 @@ docker run -dit --name ros_vvv \
   -v /dev/bus/usb:/dev/bus/usb \
   leshrimpkiller/vvv:latest bash
 
+execute terminal in same container
+docker exec -it ros_vvv bash
+
 
 build docker image:
 docker build -t leshrimpkiller/vvv .
@@ -25,9 +28,6 @@ ros2 launch veni_vidi_vici_bot_one launch_robot.launch.py
 
 list container:
 docker container ls
-
-execute terminal in same container
-docker exec -it ros_vvv bash
 
 run teleop:
 ateleop
@@ -52,12 +52,12 @@ ssh -X lolon@172.21.69.243
 
 xhost +local:root  # Allow local root user to access X server
 
-export XAUTHORITY=/home/lolon/.Xauthority
+export XAUTHORITY=/home/triplev/.Xauthority
 
 sudo docker run --rm -it --privileged --net=host \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
-  -v /home/lolon/.Xauthority:/root/.Xauthority:ro \
+  -v /home/triplev/.Xauthority:/root/.Xauthority:ro \
   -v /dev/bus/usb:/dev/bus/usb \
   leshrimpkiller/vvv:latest bash
 
