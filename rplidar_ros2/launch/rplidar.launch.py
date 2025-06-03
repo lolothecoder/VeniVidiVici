@@ -7,11 +7,7 @@ import os
 
 def generate_launch_description():
 
-    config_dir = PathJoinSubstitution([
-        FindPackageShare('rplidar_ros'),
-        'config',
-        'lidar_filter.yaml'
-    ])
+    yaml_file_path = "cd /root/ros_ws/src/rplidar_ros2/config/lidar_filter.yaml"
 
     return LaunchDescription([
         Node(
@@ -28,16 +24,16 @@ def generate_launch_description():
                 'angle_compensate': True,
                 'scan_mode': 'Standard',
             }],
-            remappings=[('scan', 'scan_raw')]
+            # remappings=[('scan', 'scan_raw')]
         ),
+        
         Node(
-            package='laser_filters',
-            executable='scan_to_scan_filter_chain',
-            name='scan_filter_chain',
-            parameters=[config_dir],
-            remappings=[
-                ('scan', 'scan_raw'),     # subscribe to raw 360° data
-                ('scan_filtered', 'scan')         # publish the cropped scan onto /scan
-            ]
-        ),
+            package="laser_filters",
+            executable="scan_to_scan_filter_chain",
+            parameters=[
+                PathJoinSubstitution([
+                    get_package_share_directory("veni_vidi_vici_bot_one"),
+                    "config", "lidar_filter.yaml",
+                ])],
+        )
     ])

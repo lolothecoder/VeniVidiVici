@@ -26,7 +26,6 @@ class DetectBall(Node):
 
         self.bridge = CvBridge()
         self.yolo   = YOLO('/site_config/best_ncnn_model1', task='detect')  
-        # or use a built‐in model: YOLO('yolov8n.pt'), but you need custom data
 
         self.image_sub = self.create_subscription(
             Image, '/image_in', self.callback,
@@ -42,7 +41,7 @@ class DetectBall(Node):
 
         # 2. run YOLOv11 inference
         #    returns a list of Results; we take the first (and only) batch
-        results = self.yolo(frame, conf=0.6, stream=False)[0]
+        results = self.yolo(frame, conf=0.85, stream=False)[0]
 
         best_pt = Point()             # x,y normalized; z holds normalized size
         best_conf = 0.0
