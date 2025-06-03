@@ -11,6 +11,7 @@ docker run -dit --name ros_vvv \
   -v /home/triplev/Documents/VeniVidiVici/veni_vidi_vici_bot_one:/root/ros_ws/src/veni_vidi_vici_bot_one \
   -v /home/triplev/Documents/VeniVidiVici/rplidar_ros2:/root/ros_ws/src/rplidar_ros2 \
   -v /home/triplev/Documents/VeniVidiVici/diffdrive_arduino:/root/ros_ws/src/diffdrive_arduino \
+  -v /home/triplev/Documents/VeniVidiVici/ball_tracker:/root/ros_ws/src/ball_tracker \
   -v /dev/bus/usb:/dev/bus/usb \
   leshrimpkiller/vvv:latest bash
 
