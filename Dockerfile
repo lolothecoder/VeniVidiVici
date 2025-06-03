@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y nano \
     python3-pip \
     python3-serial \
     python3-opencv \
+    ros-humble-cv-bridge \
     ros-humble-teleop-twist-keyboard \
     ros-humble-robot-state-publisher \
     ros-humble-twist-mux \
@@ -37,6 +38,7 @@ RUN apt-get update && apt-get install -y nano \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install ultralytics
+RUN pip install ncnn
 
 RUN python3 -m pip uninstall -y numpy
 RUN pip3 uninstall -y numpy
