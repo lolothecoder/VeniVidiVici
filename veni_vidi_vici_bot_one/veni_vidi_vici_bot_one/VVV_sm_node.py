@@ -25,6 +25,8 @@ import numpy as np
 import math
 import time
 
+import serial
+
 from veni_vidi_vici_bot_one.VVV_util import *
 
 class RobotState(Enum):
@@ -133,6 +135,11 @@ class StateMachineNode(Node):
         self.mission3_available_corners = None
 
         self.number_of_duplos_collected = 0.0
+
+        #----- Initialize serial communication -----
+
+        self.arduino = serial.Serial('/dev/ttyACM0', 57600, timeout=1)
+        self.get_logger().info('Connected to Arduino')
 
         #----- Init state machine and the listener -----
 
@@ -486,18 +493,18 @@ class StateMachineNode(Node):
         msg = Float64MultiArray()
         msg.data = servo_command
 
-        self.door_pub.publish(msg)
+        #self.door_pub.publish(msg)
 
     def _publish_storage_servo_cmd(self, servo_command=[0.0]):
 
         msg = Float64MultiArray()
         msg.data = servo_command
 
-        self.storage_pub.publish(msg)
+        #self.storage_pub.publish(msg)
 
     def _publish_collector_cmd(self, collector_command=[0.0]):
 
         msg = Float64MultiArray()
         msg.data = collector_command
 
-        self.collector_pub.publish(msg)
+        #self.collector_pub.publish(msg)

@@ -22,6 +22,7 @@ RUN set -eux; \
 RUN apt-get update && apt-get install -y nano \
     python3-pip \
     python3-serial \
+    python3-opencv \
     ros-humble-teleop-twist-keyboard \
     ros-humble-robot-state-publisher \
     ros-humble-twist-mux \
@@ -31,8 +32,17 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-rviz2 \
     ros-humble-slam-toolbox \
     ros-humble-laser-filters \
+    ros-humble-navigation2 ros-humble-nav2-bringup \
     libserial-dev \
     && rm -rf /var/lib/apt/lists/*
+
+RUN pip install ultralytics
+
+RUN python3 -m pip uninstall -y numpy
+RUN pip3 uninstall -y numpy
+RUN pip3 uninstall -y numpy
+
+RUN apt install --reinstall python3-numpy=1:1.21.5-1ubuntu22.04.1
 
 COPY config/ /site_config/
 

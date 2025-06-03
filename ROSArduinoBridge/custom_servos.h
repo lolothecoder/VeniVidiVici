@@ -5,7 +5,7 @@
 
 #define DOOR_CLOSE 0
 #define DOOR_OPEN_SHORTCUT 1
-#define DOOR_OPEN 75
+#define DOOR_OPEN 70
 
 #define RAMP_DOWN 0
 #define RAMP_UP_SHORTCUT 1

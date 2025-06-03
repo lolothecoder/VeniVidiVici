@@ -8,10 +8,11 @@ from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription, TimerAction, RegisterEventHandler, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 
-from launch.event_handlers import OnProcessExit
-from launch.conditions import IfCondition
+from launch.event_handlers import OnProcessExit, OnProcessStart
+from launch.conditions import IfCondition, UnlessCondition
 from launch.substitutions import LaunchConfiguration
 
+from launch.substitutions import Command
 from launch_ros.actions import Node
 
 
@@ -24,6 +25,7 @@ def generate_launch_description():
     activate_loc_arg  = DeclareLaunchArgument('activate_loc' , default_value='false', description='Flag to activate localisation')
     activate_cam_arg  = DeclareLaunchArgument('activate_cam' , default_value='false', description='Flag to activate camera')
     activate_sm_arg   = DeclareLaunchArgument('activate_sm'  , default_value='false', description='Flag to activate state machine')
+    activate_sim_arg  = DeclareLaunchArgument('activate_sim'  , default_value='false', description='Flag to activate simulation')
 
 
     # Include the robot_state_publisher launch file, provided by our own package. Force sim time to be enabled
@@ -165,6 +167,46 @@ def generate_launch_description():
         actions=[nav_launch_description]
     )   
 
+    image_node = Node(
+        package=package_name,
+        executable='cam_process',
+        name='cam_process',
+        output='screen',
+        condition=UnlessCondition(LaunchConfiguration('activate_sim'))
+    )
+
+    duplo_node = Node(
+        package=package_name,
+        executable='detect_duplo',
+        name='detect_duplo',
+        output='screen',
+        condition=UnlessCondition(LaunchConfiguration('activate_sim'))
+    )
+
+    ball_pos_node = Node(
+        package=package_name,
+        executable='detect_ball_3d',
+        name='detect_ball_3d',
+        # parameters=[params_file],
+        output='screen',
+        condition=UnlessCondition(LaunchConfiguration('activate_sim'))
+    )
+
+    delayed_image_node = TimerAction(
+        period=5.0, 
+        actions=[image_node]
+    )
+
+    delayed_duplo_node = TimerAction(
+        period=5.0, 
+        actions=[duplo_node]
+    )
+
+    delayed_ball_pos_node = TimerAction(
+        period=5.0, 
+        actions=[ball_pos_node]
+    )
+
     #----- Launch state machine -----
 
     sm_node = Node(
@@ -197,10 +239,15 @@ def generate_launch_description():
         activate_slam_arg,
         activate_cam_arg,
         activate_sm_arg,
+        activate_sim_arg,
 
         delayed_slam_launch,
         delayed_loc_launch,
-        delayed_nav_launch,
+        # delayed_nav_launch,
         delayed_sm_node,
+
+        # delayed_image_node,
+        # delayed_duplo_node,
+        # delayed_ball_pos_node,
 
     ])
