@@ -40,6 +40,7 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   cfg_.right_wheel_name = info_.hardware_parameters["right_wheel_name"];
   cfg_.door_servo_name = info_.hardware_parameters["door_servo_name"];
   cfg_.ramp_servo_name = info_.hardware_parameters["ramp_servo_name"];
+  cfg_.collector_servo_name = info_.hardware_parameters["collector_servo_name"];
   cfg_.loop_rate = std::stof(info_.hardware_parameters["loop_rate"]);
   cfg_.device = info_.hardware_parameters["device"];
   cfg_.baud_rate = std::stoi(info_.hardware_parameters["baud_rate"]);
@@ -62,6 +63,7 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
   wheel_r_.setup(cfg_.right_wheel_name, cfg_.enc_counts_per_rev);
   door_servo_.setup(cfg_.door_servo_name);
   ramp_servo_.setup(cfg_.ramp_servo_name);
+  collector_servo_.setup(cfg_.collector_servo_name);
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
   {
@@ -139,6 +141,11 @@ std::vector<hardware_interface::StateInterface> DiffDriveArduinoHardware::export
   state_interfaces.emplace_back(hardware_interface::StateInterface(
     ramp_servo_.name, hardware_interface::HW_IF_VELOCITY, &ramp_servo_.vel));
 
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    collector_servo_.name, hardware_interface::HW_IF_POSITION, &collector_servo_.pos));
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    collector_servo_.name, hardware_interface::HW_IF_VELOCITY, &collector_servo_.vel));
+
   return state_interfaces;
 }
 
@@ -157,6 +164,9 @@ std::vector<hardware_interface::CommandInterface> DiffDriveArduinoHardware::expo
 
   command_interfaces.emplace_back(hardware_interface::CommandInterface(
     ramp_servo_.name, hardware_interface::HW_IF_VELOCITY, &ramp_servo_.cmd));
+  
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    collector_servo_.name, hardware_interface::HW_IF_VELOCITY, &collector_servo_.cmd));
 
   return command_interfaces;
 }
@@ -240,6 +250,9 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   ramp_servo_.vel = 1;
   ramp_servo_.pos = 1;
 
+  collector_servo_.vel = 1;
+  collector_servo_.pos = 1;
+
   return hardware_interface::return_type::OK;
 }
 
@@ -262,6 +275,8 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
   comms_.set_servo_door_values(door_servo_.cmd);
 
   comms_.set_servo_ramp_values(ramp_servo_.cmd);
+
+  comms_.set_servo_collector_values(collector_servo_.cmd);
 
   return hardware_interface::return_type::OK;
 }

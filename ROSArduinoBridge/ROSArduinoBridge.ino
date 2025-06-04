@@ -245,8 +245,8 @@ int runCommand() {
     break;
   case BATTERY_LEVEL:
     battery_level();
-    break;
     Serial.println("OK");
+    break;
   case ACTIVATE_SERVO:
     lastServoCommand = millis();
     setServo(arg1, arg2);

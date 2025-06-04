@@ -46,6 +46,7 @@ struct Config
   std::string right_wheel_name = "";
   std::string door_servo_name = "";
   std::string ramp_servo_name = "";
+  std::string collector_servo_name = "";
   float loop_rate = 0.0;
   std::string device = "";
   int baud_rate = 0;
@@ -104,6 +105,7 @@ private:
   Wheel wheel_r_;
   Servo door_servo_;
   Servo ramp_servo_;
+  Servo collector_servo_;
 
 };
 

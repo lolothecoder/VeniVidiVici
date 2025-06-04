@@ -117,7 +117,7 @@ public:
     send_msg(ss.str());
   }
 
-    void set_servo_ramp_values(int val)
+  void set_servo_ramp_values(int val)
   {
     std::stringstream ss;
     // Sending command to the servo 
@@ -126,6 +126,15 @@ public:
     else
       ss << "h 1 1" << "\r"; // Set the servo to a position
     //ss << "h " + std::to_string(val) + "\r";
+
+    send_msg(ss.str());
+  }
+
+  void set_servo_collector_values(int val)
+  {
+    std::stringstream ss;
+    // Sending command to the servo 
+    ss << "g " << std::to_string(val) << "\r"; // Set the servo to a position
 
     send_msg(ss.str());
   }

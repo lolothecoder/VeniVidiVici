@@ -9,6 +9,8 @@ controller_manager:
       type: velocity_controllers/JointGroupVelocityController
     ramp_servo:
       type: velocity_controllers/JointGroupVelocityController
+    collector_servo:
+      type: velocity_controllers/JointGroupVelocityController
 
 diff_cont:
   ros__parameters:
@@ -29,3 +31,8 @@ ramp_servo:
   ros__parameters:
     joints:
       - ramp_joint
+
+collector_servo:
+  ros__parameters:
+    joints:
+      - collector_joint

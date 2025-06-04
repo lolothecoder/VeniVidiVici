@@ -96,8 +96,9 @@ def execute_SALL_READY(self):
     self.get_logger().info("State: SALL_READY")
     next_state = RobotState.SALL_READY
 
-    self._publish_door_servo_cmd(servo_command=[1.0])
-    self._publish_ramp_servo_cmd(servo_command=[1.0])
+    #self._publish_door_servo_cmd(servo_command=[1.0])
+    #self._publish_ramp_servo_cmd(servo_command=[1.0])
+    #self._publish_collector_servo_cmd(collector_command=[-72.0])
 
     #----- Check for transition -----
 

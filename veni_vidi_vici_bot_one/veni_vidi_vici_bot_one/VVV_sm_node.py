@@ -162,7 +162,7 @@ class StateMachineNode(Node):
 
         self.door_pub      = self.create_publisher(Float64MultiArray, '/door_servo/commands', 10)
         self.ramp_pub      = self.create_publisher(Float64MultiArray, '/ramp_servo/commands', 10)
-        self.collector_pub = self.create_publisher(Float64MultiArray, '/collector/commands', 10)
+        self.collector_pub = self.create_publisher(Float64MultiArray, '/collector_servo/commands', 10)
 
         #----- Create Subscribers -----
 
@@ -503,7 +503,7 @@ class StateMachineNode(Node):
 
         self.ramp_pub.publish(msg)
 
-    def _publish_collector_cmd(self, collector_command=[0.0]):
+    def _publish_collector_servo_cmd(self, collector_command=[0.0]):
 
         msg = Float64MultiArray()
         msg.data = collector_command

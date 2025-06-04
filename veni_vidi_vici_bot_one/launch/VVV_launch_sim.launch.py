@@ -128,6 +128,19 @@ def generate_launch_description():
         )
     )
 
+    collector_servo_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["collector_servo"],
+    )
+
+    delayed_collector_servo_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_manager,
+            on_start=[collector_servo_spawner],
+        )
+    )
+
     #----- Launch camera -----
 
     # yolov6_launch = IncludeLaunchDescription(
@@ -259,6 +272,7 @@ def generate_launch_description():
         delayed_joint_broad_spawner,
         delayed_door_servo_spawner,
         delayed_ramp_servo_spawner,
+        delayed_collector_servo_spawner,
 
 #        yolov6_launch,
 
