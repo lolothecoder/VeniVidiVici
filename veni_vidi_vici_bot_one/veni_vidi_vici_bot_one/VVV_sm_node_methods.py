@@ -96,6 +96,9 @@ def execute_SALL_READY(self):
     self.get_logger().info("State: SALL_READY")
     next_state = RobotState.SALL_READY
 
+    self._publish_door_servo_cmd(servo_command=[1.0])
+    self._publish_ramp_servo_cmd(servo_command=[1.0])
+
     #----- Check for transition -----
 
     if self.current_mission == 1 and self.start and not self.stop:

@@ -96,10 +96,37 @@ public:
     val_1 = std::atoi(token_1.c_str());
     val_2 = std::atoi(token_2.c_str());
   }
+
   void set_motor_values(int val_1, int val_2)
   {
     std::stringstream ss;
     ss << "o " << val_1 << " " << val_2 << "\r";
+    send_msg(ss.str());
+  }
+
+  void set_servo_door_values(int val)
+  {
+    std::stringstream ss;
+    // Sending command to the servo 
+    if(val ==0)
+      ss << "h 0 0" << "\r"; // Stop the servo
+    else
+      ss << "h 0 1" << "\r"; // Set the servo to a position
+    //ss << "h " + std::to_string(val) + "\r";
+
+    send_msg(ss.str());
+  }
+
+    void set_servo_ramp_values(int val)
+  {
+    std::stringstream ss;
+    // Sending command to the servo 
+    if(val ==0)
+      ss << "h 1 0" << "\r"; // Stop the servo
+    else
+      ss << "h 1 1" << "\r"; // Set the servo to a position
+    //ss << "h " + std::to_string(val) + "\r";
+
     send_msg(ss.str());
   }
 

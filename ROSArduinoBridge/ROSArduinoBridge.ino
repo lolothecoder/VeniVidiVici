@@ -246,9 +246,11 @@ int runCommand() {
   case BATTERY_LEVEL:
     battery_level();
     break;
+    Serial.println("OK");
   case ACTIVATE_SERVO:
     lastServoCommand = millis();
     setServo(arg1, arg2);
+    Serial.println("OK");
     break;
   case UPDATE_PID:
     while ((str = strtok_r(p, ":", &p)) != '\0') {

@@ -102,6 +102,32 @@ def generate_launch_description():
         )
     )
 
+    door_servo_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["door_servo"],
+    )
+
+    delayed_door_servo_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_manager,
+            on_start=[door_servo_spawner],
+        )
+    )
+
+    ramp_servo_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["ramp_servo"],
+    )
+
+    delayed_ramp_servo_spawner = RegisterEventHandler(
+        event_handler=OnProcessStart(
+            target_action=controller_manager,
+            on_start=[ramp_servo_spawner],
+        )
+    )
+
     #----- Launch camera -----
 
     # yolov6_launch = IncludeLaunchDescription(
@@ -231,6 +257,8 @@ def generate_launch_description():
         delayed_controller_manager,
         delayed_diff_drive_spawner,
         delayed_joint_broad_spawner,
+        delayed_door_servo_spawner,
+        delayed_ramp_servo_spawner,
 
 #        yolov6_launch,
 
@@ -246,8 +274,8 @@ def generate_launch_description():
         delayed_nav_launch,
         delayed_sm_node,
 
-        delayed_image_node,
-        delayed_duplo_node,
-        delayed_duplo_pos_node,
+        #delayed_image_node,
+        #delayed_duplo_node,
+        #delayed_duplo_pos_node,
 
     ])

@@ -38,6 +38,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
 
   cfg_.left_wheel_name = info_.hardware_parameters["left_wheel_name"];
   cfg_.right_wheel_name = info_.hardware_parameters["right_wheel_name"];
+  cfg_.door_servo_name = info_.hardware_parameters["door_servo_name"];
+  cfg_.ramp_servo_name = info_.hardware_parameters["ramp_servo_name"];
   cfg_.loop_rate = std::stof(info_.hardware_parameters["loop_rate"]);
   cfg_.device = info_.hardware_parameters["device"];
   cfg_.baud_rate = std::stoi(info_.hardware_parameters["baud_rate"]);
@@ -58,7 +60,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
 
   wheel_l_.setup(cfg_.left_wheel_name, cfg_.enc_counts_per_rev);
   wheel_r_.setup(cfg_.right_wheel_name, cfg_.enc_counts_per_rev);
-
+  door_servo_.setup(cfg_.door_servo_name);
+  ramp_servo_.setup(cfg_.ramp_servo_name);
 
   for (const hardware_interface::ComponentInfo & joint : info_.joints)
   {
@@ -126,6 +129,16 @@ std::vector<hardware_interface::StateInterface> DiffDriveArduinoHardware::export
   state_interfaces.emplace_back(hardware_interface::StateInterface(
     wheel_r_.name, hardware_interface::HW_IF_VELOCITY, &wheel_r_.vel));
 
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    door_servo_.name, hardware_interface::HW_IF_POSITION, &door_servo_.pos));
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    door_servo_.name, hardware_interface::HW_IF_VELOCITY, &door_servo_.vel));
+  
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    ramp_servo_.name, hardware_interface::HW_IF_POSITION, &ramp_servo_.pos));
+  state_interfaces.emplace_back(hardware_interface::StateInterface(
+    ramp_servo_.name, hardware_interface::HW_IF_VELOCITY, &ramp_servo_.vel));
+
   return state_interfaces;
 }
 
@@ -138,6 +151,12 @@ std::vector<hardware_interface::CommandInterface> DiffDriveArduinoHardware::expo
 
   command_interfaces.emplace_back(hardware_interface::CommandInterface(
     wheel_r_.name, hardware_interface::HW_IF_VELOCITY, &wheel_r_.cmd));
+  
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    door_servo_.name, hardware_interface::HW_IF_VELOCITY, &door_servo_.cmd));
+
+  command_interfaces.emplace_back(hardware_interface::CommandInterface(
+    ramp_servo_.name, hardware_interface::HW_IF_VELOCITY, &ramp_servo_.cmd));
 
   return command_interfaces;
 }
@@ -206,16 +225,20 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
 
   double delta_seconds = period.seconds();
 
-  double pos_prev = wheel_l_.pos;
-
-  wheel_l_.vel = wheel_l_.cmd/ 23.8;
-  wheel_r_.vel = wheel_r_.cmd/ 23.8;
+  wheel_l_.vel = wheel_l_.cmd/27.62;
+  wheel_r_.vel = wheel_r_.cmd/27.62;
 
   RCLCPP_DEBUG(
     rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
 
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
+  
+  door_servo_.vel = 1;
+  door_servo_.pos = 1;
+
+  ramp_servo_.vel = 1;
+  ramp_servo_.pos = 1;
 
   return hardware_interface::return_type::OK;
 }
@@ -229,11 +252,17 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
   }
 
   RCLCPP_DEBUG(
-    rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent speed values: %f %f",  wheel_l_.cmd,  wheel_r_.cmd);
+    rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent speed values: %f",  door_servo_.cmd);
 
-  wheel_l_.cmd = 23.8*wheel_l_.cmd * 1.02;  // 1.01 is a correction factor
-  wheel_r_.cmd = 23.8*wheel_r_.cmd;
+  wheel_l_.cmd = wheel_l_.cmd * 27.62;
+  wheel_r_.cmd = wheel_r_.cmd * 27.62;
+
   comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
+
+  comms_.set_servo_door_values(door_servo_.cmd);
+
+  comms_.set_servo_ramp_values(ramp_servo_.cmd);
+
   return hardware_interface::return_type::OK;
 }
 

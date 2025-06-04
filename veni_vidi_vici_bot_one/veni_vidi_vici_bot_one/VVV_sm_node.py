@@ -159,8 +159,9 @@ class StateMachineNode(Node):
         #----- Create Publishers -----
 
         self.vel_pub       = self.create_publisher(Twist, '/cmd_vel_mn', 10)
+
         self.door_pub      = self.create_publisher(Float64MultiArray, '/door_servo/commands', 10)
-        self.storage_pub   = self.create_publisher(Float64MultiArray, '/storage_servo/commands', 10)
+        self.ramp_pub      = self.create_publisher(Float64MultiArray, '/ramp_servo/commands', 10)
         self.collector_pub = self.create_publisher(Float64MultiArray, '/collector/commands', 10)
 
         #----- Create Subscribers -----
@@ -493,18 +494,18 @@ class StateMachineNode(Node):
         msg = Float64MultiArray()
         msg.data = servo_command
 
-        #self.door_pub.publish(msg)
+        self.door_pub.publish(msg)
 
-    def _publish_storage_servo_cmd(self, servo_command=[0.0]):
+    def _publish_ramp_servo_cmd(self, servo_command=[0.0]):
 
         msg = Float64MultiArray()
         msg.data = servo_command
 
-        #self.storage_pub.publish(msg)
+        self.ramp_pub.publish(msg)
 
     def _publish_collector_cmd(self, collector_command=[0.0]):
 
         msg = Float64MultiArray()
         msg.data = collector_command
 
-        #self.collector_pub.publish(msg)
+        self.collector_pub.publish(msg)

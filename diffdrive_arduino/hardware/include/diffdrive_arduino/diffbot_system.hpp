@@ -33,6 +33,7 @@
 
 #include "diffdrive_arduino/arduino_comms.hpp"
 #include "diffdrive_arduino/wheel.hpp"
+#include "diffdrive_arduino/servo.hpp"
 
 namespace diffdrive_arduino
 {
@@ -43,6 +44,8 @@ struct Config
 {
   std::string left_wheel_name = "";
   std::string right_wheel_name = "";
+  std::string door_servo_name = "";
+  std::string ramp_servo_name = "";
   float loop_rate = 0.0;
   std::string device = "";
   int baud_rate = 0;
@@ -52,7 +55,7 @@ struct Config
   int pid_d = 0;
   int pid_i = 0;
   int pid_o = 0;
-};
+}; 
 
 
 public:
@@ -99,6 +102,9 @@ private:
   Config cfg_;
   Wheel wheel_l_;
   Wheel wheel_r_;
+  Servo door_servo_;
+  Servo ramp_servo_;
+
 };
 
 }  // namespace diffdrive_arduino
