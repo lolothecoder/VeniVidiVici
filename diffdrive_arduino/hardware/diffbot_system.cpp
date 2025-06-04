@@ -234,13 +234,21 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   }
 
   double delta_seconds = period.seconds();
+  bool wheel_l_neg = false;
+  bool wheel_r_neg = false;
+  if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
+  if (wheel_r_.cmd < 0.0) wheel_r_neg = true;
 
-  wheel_l_.vel = wheel_l_.cmd/27.62;
-  wheel_r_.vel = wheel_r_.cmd/27.62;
+  wheel_l_.cmd = std::abs(wheel_l_.cmd);
+  wheel_r_.cmd = std::abs(wheel_r_.cmd);
 
-  RCLCPP_DEBUG(
-    rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
-
+  wheel_l_.vel = (wheel_l_.cmd-24.5) / 16.52;
+  wheel_r_.vel = (wheel_r_.cmd-24.5) / 16.52;
+  if (wheel_l_neg) wheel_l_.vel = -wheel_l_.vel;
+  if (wheel_r_neg) wheel_r_.vel = -wheel_r_.vel;
+  //RCLCPP_DEBUG(
+   //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
+  
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
   
@@ -265,12 +273,22 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
   }
 
   RCLCPP_DEBUG(
-    rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent speed values: %f",  door_servo_.cmd);
+    rclcpp::get_logger("DiffDriveArduinoHardware"), "Inital motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
+  bool wheel_l_neg = false;
+  bool wheel_r_neg = false;
+  if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
+  if (wheel_r_.cmd < 0.0) wheel_r_neg = true;
 
-  wheel_l_.cmd = wheel_l_.cmd * 27.62;
-  wheel_r_.cmd = wheel_r_.cmd * 27.62;
+  wheel_l_.cmd = std::abs(wheel_l_.cmd);
+  wheel_r_.cmd = std::abs(wheel_r_.cmd);
+  wheel_l_.cmd = wheel_l_.cmd * 16.52 + 24.5;
+  wheel_r_.cmd = wheel_r_.cmd * 16.52 + 24.5;
 
-  comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
+    //RCLCPP_DEBUG(
+    //rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
+  if (wheel_l_neg) wheel_l_.cmd = -wheel_l_.cmd;
+  if (wheel_r_neg) wheel_r_.cmd = -wheel_r_.cmd;
+  comms_.set_motor_values(wheel_l_.cmd*1.02, wheel_r_.cmd);
 
   comms_.set_servo_door_values(door_servo_.cmd);
 

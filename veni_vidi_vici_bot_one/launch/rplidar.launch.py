@@ -25,17 +25,17 @@ def generate_launch_description():
             # remappings=[('scan', 'scan_raw')]
         ),
         
-        Node(
-            package="laser_filters",
-            executable="scan_to_scan_filter_chain",
-            parameters=[
-                PathJoinSubstitution([
-                    get_package_share_directory("veni_vidi_vici_bot_one"),
-                    "config", "lidar_filter.yaml",
-                ])],
-            # remappings=[
-            #     ('scan', 'scan_raw'),        
-            #     ('scan_filtered', 'scan')
-            # ]
-        )
+        # Node(
+        #     package="laser_filters",
+        #     executable="scan_to_scan_filter_chain",
+        #     parameters=[
+        #         PathJoinSubstitution([
+        #             get_package_share_directory("veni_vidi_vici_bot_one"),
+        #             "config", "lidar_filter.yaml",
+        #         ])],
+        #     # remappings=[
+        #     #     ('scan', 'scan_raw'),        
+        #     #     ('scan_filtered', 'scan')
+        #     # ]
+        # )
     ])

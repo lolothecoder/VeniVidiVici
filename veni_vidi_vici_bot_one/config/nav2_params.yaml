@@ -197,7 +197,7 @@ local_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 1.0
-        inflation_radius: 0.2
+        inflation_radius: 0.26
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -207,7 +207,7 @@ local_costmap:
         z_voxels: 16
         max_obstacle_height: 2.0
         mark_threshold: 0
-        observation_sources: scan_filtered
+        observation_sources: scan
         scan:
           topic: /scan
           max_obstacle_height: 2.0
@@ -255,7 +255,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 1.0
-        inflation_radius: 0.2 #0.4
+        inflation_radius: 0.26 #0.4
       always_send_full_costmap: True
 
 map_server:

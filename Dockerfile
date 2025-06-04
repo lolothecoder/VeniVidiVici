@@ -32,7 +32,7 @@ RUN pip3 uninstall -y numpy
 
 RUN apt install --reinstall python3-numpy=1:1.21.5-1ubuntu22.04.1
 
-RUN apt install -y ros-humble-tf-transformations
+RUN apt-get update && apt install -y nano ros-humble-tf-transformations
 
 COPY config/ /site_config/
 
