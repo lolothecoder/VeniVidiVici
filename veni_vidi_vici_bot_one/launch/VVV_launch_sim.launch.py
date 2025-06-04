@@ -183,10 +183,10 @@ def generate_launch_description():
         condition=UnlessCondition(LaunchConfiguration('activate_sim'))
     )
 
-    ball_pos_node = Node(
+    duplo_pos_node = Node(
         package=package_name,
-        executable='detect_ball_3d',
-        name='detect_ball_3d',
+        executable='detect_duplo_3d',
+        name='detect_duplo_3d',
         # parameters=[params_file],
         output='screen',
         condition=UnlessCondition(LaunchConfiguration('activate_sim'))
@@ -202,9 +202,9 @@ def generate_launch_description():
         actions=[duplo_node]
     )
 
-    delayed_ball_pos_node = TimerAction(
+    delayed_duplo_pos_node = TimerAction(
         period=15.0, 
-        actions=[ball_pos_node]
+        actions=[duplo_pos_node]
     )
 
     #----- Launch state machine -----
@@ -243,11 +243,11 @@ def generate_launch_description():
 
         delayed_slam_launch,
         delayed_loc_launch,
-        # delayed_nav_launch,
+        delayed_nav_launch,
         delayed_sm_node,
 
         delayed_image_node,
         delayed_duplo_node,
-        # delayed_ball_pos_node,
+        delayed_duplo_pos_node,
 
     ])

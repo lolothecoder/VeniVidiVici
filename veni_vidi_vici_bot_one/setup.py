@@ -45,9 +45,9 @@ setup(
     entry_points={
         'console_scripts': [
             'VVV_sm_node = veni_vidi_vici_bot_one.VVV_sm_node_main:main',
-            'detect_duplo = veni_vidi_vici_bot_one.detect_duplo:main',
             'cam_process = veni_vidi_vici_bot_one.cam_process:main',
-            # 'detect_ball_3d = veni_vidi_vici_bot_one.detect_ball_3d:main',
+            'detect_duplo = veni_vidi_vici_bot_one.detect_duplo:main',
+            'detect_duplo_3d = veni_vidi_vici_bot_one.detect_duplo_3d:main',
         ],
     },
 )

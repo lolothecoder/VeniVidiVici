@@ -50,7 +50,7 @@ def generate_launch_description():
     cmd_vel_topic = LaunchConfiguration('cmd_vel_topic')
     cmd_vel_topic_dec = DeclareLaunchArgument(
     'cmd_vel_topic',
-    default_value='/cmd_vel',
+    default_value='diff_cont/cmd_vel_unstamped',
     description='The name of the output command vel topic.')
 
     enable_3d_tracker = LaunchConfiguration('enable_3d_tracker')

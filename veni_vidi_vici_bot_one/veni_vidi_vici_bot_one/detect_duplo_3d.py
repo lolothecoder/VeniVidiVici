@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-robust_detect_ball_3d.py
+detect_duplo_3d.py
 ────────────────────────
-• Sub  : /detected_ball       (geometry_msgs/Point)  x = u_norm, y = v_norm
-• Pub  : /detected_ball_3d     (geometry_msgs/Point)  frame = camera_link_optical
+• Sub  : /detected_duplo      (geometry_msgs/Point)  x = u_norm, y = v_norm
+• Pub  : /detected_duplo_3d     (geometry_msgs/Point)  frame = camera_link_optical
          /ball_3d_marker       (visualization_msgs/Marker)
 
 Uses TF to obtain the live transform map → camera_link_optical.
@@ -21,8 +21,8 @@ from visualization_msgs.msg import Marker
 from tf_transformations import quaternion_matrix
 
 # ────────── camera intrinsics ───────────────────────────────────────────
-K = np.array([[528.4338, 0, 320],
-              [0, 528.4338, 240],
+K = np.array([[1133.10504192, 0, 628.21074810],
+              [0, 1133.44274070, 375.68857455],
               [0,       0,   1]], dtype=np.float64)
 K_inv = np.linalg.inv(K)
 
@@ -33,15 +33,15 @@ CENTER_THRESH_Y = 0.99                                     # normalised pixels
 # ────────── ROS2 node ───────────────────────────────────────────────────
 class DetectBall3D(Node):
     def __init__(self):
-        super().__init__('robust_detect_ball_3d')
+        super().__init__('detect_duplo_3d')
 
         # TF buffer / listener
         self.tfbuf  = tf2_ros.Buffer()
         self.tflist = tf2_ros.TransformListener(self.tfbuf, self,
                                                 spin_thread=True)
 
-        self.create_subscription(Point, '/detected_ball', self.cb, 10)
-        self.pub  = self.create_publisher(Point,  '/detected_ball_3d', 10)
+        self.create_subscription(Point, '/detected_duplo', self.cb, 10)
+        self.pub  = self.create_publisher(Point,  '/detected_duplo_3d', 10)
         self.mpub = self.create_publisher(Marker, '/ball_3d_marker', 10)
 
         self.ball_radius = 0.033
@@ -59,7 +59,7 @@ class DetectBall3D(Node):
         # 2. build image ray in camera frame (undistort not needed in sim)
         ray_cam = K_inv @ np.array([u_px, v_px, 1.0], np.float64)
 
-        # 3. get map → camera_link_optical transform
+        # # 3. get map → camera_link_optical transform
         if not self.tfbuf.can_transform('camera_link_optical', 'map',
                                         rclpy.time.Time()):
             return                                           # TF not ready

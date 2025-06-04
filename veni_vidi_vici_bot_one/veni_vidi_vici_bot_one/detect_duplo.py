@@ -31,7 +31,7 @@ class DetectBall(Node):
             Image, '/image_in', self.callback,
             rclpy.qos.QoSPresetProfiles.SENSOR_DATA.value
         )
-        self.ball_pub = self.create_publisher(Point, '/detected_ball', 1)
+        self.ball_pub = self.create_publisher(Point, '/detected_duplo', 1)
 
         self.get_logger().info('YOLOv11 duplos detector initialized.')
 

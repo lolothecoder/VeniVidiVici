@@ -2,22 +2,6 @@ FROM ros:humble-ros-base
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN set -eux; \
-    # 1. Disable all ROS apt entries (they all live in /etc/apt/sources.list.d)
-    find /etc/apt/sources.list.d -name '*ros*.list' -exec sed -i 's/^deb /# deb /' {} \; ; \
-    # 2. Update only Ubuntu, install tools we need to fetch the key
-    apt-get update; \
-    apt-get install -y --no-install-recommends curl gnupg2 ca-certificates lsb-release; \
-    # 3. Fetch the NEW key and put it where apt expects it
-    curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
-      | gpg --dearmor -o /usr/share/keyrings/ros-archive-keyring.gpg; \
-    # 4. Re-enable the ROS repo and make it point at the keyring we just wrote
-    distro=$(lsb_release -cs); \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
-          http://packages.ros.org/ros2/ubuntu $distro main" \
-        > /etc/apt/sources.list.d/ros2.list; \
-    # 5. Now a full update works
-    apt-get update
 
 RUN apt-get update && apt-get install -y nano \
     python3-pip \
@@ -33,7 +17,9 @@ RUN apt-get update && apt-get install -y nano \
     ros-humble-rviz2 \
     ros-humble-slam-toolbox \
     ros-humble-laser-filters \
-    ros-humble-navigation2 ros-humble-nav2-bringup \
+    ros-humble-navigation2\ 
+    ros-humble-nav2-bringup \
+    ros-humble-nav2-rviz-plugins \
     libserial-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -45,6 +31,8 @@ RUN pip3 uninstall -y numpy
 RUN pip3 uninstall -y numpy
 
 RUN apt install --reinstall python3-numpy=1:1.21.5-1ubuntu22.04.1
+
+RUN apt install -y ros-humble-tf-transformations
 
 COPY config/ /site_config/
 

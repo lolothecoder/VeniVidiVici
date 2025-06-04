@@ -7,8 +7,6 @@ import os
 
 def generate_launch_description():
 
-    yaml_file_path = "cd /root/ros_ws/src/rplidar_ros2/config/lidar_filter.yaml"
-
     return LaunchDescription([
         Node(
             name='rplidar_composition',
@@ -35,5 +33,9 @@ def generate_launch_description():
                     get_package_share_directory("veni_vidi_vici_bot_one"),
                     "config", "lidar_filter.yaml",
                 ])],
+            # remappings=[
+            #     ('scan', 'scan_raw'),        
+            #     ('scan_filtered', 'scan')
+            # ]
         )
     ])

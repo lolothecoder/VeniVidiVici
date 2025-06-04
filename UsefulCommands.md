@@ -81,4 +81,4 @@ source /opt/ros/humble/setup.bash
 source ~/ros_ws/install/setup.bash
 export ROS_DOMAIN_ID=5
 
-ros2 launch veni_vidi_vici_bot_one VVV_launch_sim.launch.py activate_nav:=true activate_loc:=true activate_sm:=true activate_cam:=true use_ros2_control:=true 
+ros2 launch veni_vidi_vici_bot_one VVV_launch_sim.launch.py activate_nav:=true activate_loc:=true activate_sm:=true use_ros2_control:=true activate_slam:=true 
