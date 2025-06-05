@@ -136,11 +136,6 @@ class StateMachineNode(Node):
 
         self.number_of_duplos_collected = 0.0
 
-        #----- Initialize serial communication -----
-
-        self.arduino = serial.Serial('/dev/ttyACM0', 57600, timeout=1)
-        self.get_logger().info('Connected to Arduino')
-
         #----- Init state machine and the listener -----
 
         self.initialized = self._init_state_machine()

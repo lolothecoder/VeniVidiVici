@@ -207,6 +207,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_cleanup(
 hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
+  wheel_l_.pos = 0.0;
+  wheel_r_.pos = 0.0;
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Activating ...please wait...");
   if (!comms_.connected())
   {
@@ -264,9 +266,14 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   //}
   //RCLCPP_INFO(
    //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
-  
+  //allo woohooo
+  // lots of code
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
+  int i = 0;
+  int e = 0;
+  int f = 0;
+  int g = 0;
 
   //RCLCPP_INFO(
    //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read positions values: %f %f", wheel_l_.pos,  wheel_r_.pos);

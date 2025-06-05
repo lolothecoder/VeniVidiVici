@@ -98,7 +98,7 @@ def execute_SALL_READY(self):
 
     #self._publish_door_servo_cmd(servo_command=[1.0])
     #self._publish_ramp_servo_cmd(servo_command=[1.0])
-    #self._publish_collector_servo_cmd(collector_command=[-72.0])
+    self._publish_collector_servo_cmd(collector_command=[-72.0])
 
     #----- Check for transition -----
 
@@ -122,6 +122,7 @@ def execute_S1_MOVE_TO_P10(self):
     next_state = RobotState.S1_MOVE_TO_P10
 
     #----- Check for transition -----
+    self._publish_collector_servo_cmd(collector_command=[-72.0])
 
     p10 = self.list_of_corners_Z1[0]
     p10_x = p10['x']
@@ -164,95 +165,42 @@ def execute_S1_MOVE_TO_P10(self):
 
 def execute_S1_PRESS_BUTTON(self):
 
-    self.get_logger().info("State: S1_PRESS_BUTTON")
-    next_state = RobotState.S1_PRESS_BUTTON
+    self._publish_collector_servo_cmd(collector_command=[-72.0])
+    p10_x = 4.5
+    p10_y = 4.5
+    p10_theta = 3.0*np.pi/4.0
 
-    des_x = self.button_['x']
-    des_y = self.button_['y']
-    des_theta = self.button_['theta']
-    door_thr = self.button_['door_range']
+    if not self.started_moving:
 
-    if self.adjust_orientation:
+        self.start_time = self.get_clock().now()
+        self.started_moving = True
 
-        current_yaw = self.yaw
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=des_theta, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.1, min_angular_speed=0.01, control=True)
+    if self.wait_for_goal == False:
+        
+        self._navigate_to_pose(goal_x=p10_x, goal_y=p10_y, goal_theta=p10_theta)
+        self.wait_for_goal = True
 
-        if not rotation_goal_reached:
+    else:
+         
+        if self.navigator.isTaskComplete():
+              
+            result = self.navigator.getResult()
 
-            self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
+            current_x   = self.trans.transform.translation.x
+            current_y   = self.trans.transform.translation.y
+            current_yaw = self.yaw
 
-        else:
-            
-            self.get_logger().info("ORIENTATION ADJUSTED") 
-            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-            self.adjust_orientation = False
-            self.approach_button = True
+            self.get_logger().info(f"Current pose in map: x={current_x:.2f}, y={current_y:.2f}, yaw={current_yaw:.2f} rad")
 
-    elif self.approach_button:
+            if result == TaskResult.SUCCEEDED:
+                   
+                self.get_logger().info('REACHED P10')
+                self.wait_for_goal = False
+                next_state = RobotState.S1_MOVE_TO_P11
 
-        current_x   = self.trans.transform.translation.x
-        current_y   = self.trans.transform.translation.y
-        trans_goal_reached, linear_x_mn = execute_translation(des_x, des_y, current_x, current_y, distance_tolerance=0.1, max_linear_speed=0.1, min_linear_speed=0.01)
+            else:
 
-        if not trans_goal_reached:
-
-            self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0)
-
-        else:
-
-            self.get_logger().info("BUTTON APROACHED") 
-            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-            self.approach_button = False
-            self.verify_door_is_open = True
-
-    elif self.verify_door_is_open:
-
-        self.S1_door_open = self.left_distance > door_thr
-        self.get_logger().info(f"Door range: measured={self.left_distance:.2f}, thr={door_thr:.2f}")
-
-        if self.S1_door_open:
-
-            self.get_logger().info("DOOR IS OPEN")
-            self.verify_door_is_open = False
-            self.go_back_button = True
-
-        elif self.wait_scan_counter < 10:
-
-            self.wait_scan_counter += 1
-
-        elif self.num_press_attempt < 2:
-
-            self.num_press_attempt += 1
-            self.adjust_orientation = True
-            self.wait_scan_counter = 0.0
-
-        else:
-
-            self.get_logger().info("FAILED TO OPEN THE DOOR... MISSION ABORT")
-            next_state = RobotState.SALL_RETURN_TO_S
-
-    elif self.go_back_button:
-
-        des_x_ret = des_x - 0.4
-        des_y_ret = des_y
-
-        current_x   = self.trans.transform.translation.x
-        current_y   = self.trans.transform.translation.y
-
-        return_goal_reached, linear_x_mn = execute_translation(des_x_ret, des_y_ret, current_x, current_y, distance_tolerance=0.1, max_linear_speed=0.1, min_linear_speed=0.01)
-
-        if not return_goal_reached:
-
-            self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0) 
-
-        else:
-            self.get_logger().info("RETURN REACHED") 
-            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-            self.go_back_button = False
-
-    else:   
-
-        next_state = RobotState.S1_MOVE_TO_P11
+                self.get_logger().info('FAILED TO REACH P10')
 
     return next_state 
 
@@ -260,7 +208,7 @@ def execute_S1_MOVE_TO_P11(self):
 
     self.get_logger().info("State: S1_MOVE_TO_P11")
     next_state = RobotState.S1_MOVE_TO_P11
-
+    self._publish_collector_servo_cmd(collector_command=[-0.0])
     return next_state
 
 #----- Attach the methods to the class -----
