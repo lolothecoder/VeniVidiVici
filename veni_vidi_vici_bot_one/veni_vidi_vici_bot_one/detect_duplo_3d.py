@@ -110,13 +110,13 @@ class DetectBall3D(Node):
 
         # 7. debug prints
         dist_cam = np.linalg.norm(P_cam)
-        self.get_logger().info(
-            f"P_cam {P_cam[0]:6.2f} {P_cam[1]:6.2f} {P_cam[2]:6.2f}  "
-            f"| dist {dist_cam:5.2f} m"
-        )
-        self.get_logger().info(
-            f"P_map {P_map[0]:6.2f} {P_map[1]:6.2f} {P_map[2]:6.2f}"
-        )
+        # self.get_logger().info(
+        #     f"P_cam {P_cam[0]:6.2f} {P_cam[1]:6.2f} {P_cam[2]:6.2f}  "
+        #     f"| dist {dist_cam:5.2f} m"
+        # )
+        # self.get_logger().info(
+        #     f"P_map {P_map[0]:6.2f} {P_map[1]:6.2f} {P_map[2]:6.2f}"
+        # )
 
 # ────────── main ────────────────────────────────────────────────────────
 def main(args=None):

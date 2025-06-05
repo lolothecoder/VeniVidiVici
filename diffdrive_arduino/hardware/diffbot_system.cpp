@@ -180,6 +180,11 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_configure(
     comms_.disconnect();
   }
   comms_.connect(cfg_.device, cfg_.baud_rate, cfg_.timeout_ms);
+
+    // <— Zero out both wheel positions so read() logs start at 0
+  wheel_l_.pos = 0.0;
+  wheel_r_.pos = 0.0;
+  
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully configured!");
 
   return hardware_interface::CallbackReturn::SUCCESS;
@@ -234,23 +239,37 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   }
 
   double delta_seconds = period.seconds();
-  bool wheel_l_neg = false;
-  bool wheel_r_neg = false;
-  if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
-  if (wheel_r_.cmd < 0.0) wheel_r_neg = true;
+  //bool wheel_l_neg = false;
+  //bool wheel_r_neg = false;
+  //if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
+  //if (wheel_r_.cmd < 0.0) wheel_r_neg = true;
 
-  wheel_l_.cmd = std::abs(wheel_l_.cmd);
-  wheel_r_.cmd = std::abs(wheel_r_.cmd);
+  //wheel_l_.cmd = std::abs(wheel_l_.cmd);
+  //wheel_r_.cmd = std::abs(wheel_r_.cmd);
 
-  wheel_l_.vel = (wheel_l_.cmd-24.5) / 16.52;
-  wheel_r_.vel = (wheel_r_.cmd-24.5) / 16.52;
-  if (wheel_l_neg) wheel_l_.vel = -wheel_l_.vel;
-  if (wheel_r_neg) wheel_r_.vel = -wheel_r_.vel;
-  //RCLCPP_DEBUG(
+  //wheel_l_.vel = (wheel_l_.cmd-24.5) / 16.52;
+  //wheel_r_.vel = (wheel_r_.cmd-24.5) / 16.52;
+  wheel_l_.vel = wheel_l_.cmd / 23.8;
+  wheel_r_.vel = wheel_r_.cmd / 23.8;
+  //if (wheel_l_neg) wheel_l_.vel = -wheel_l_.vel;
+  //if (wheel_r_neg) wheel_r_.vel = -wheel_r_.vel;
+
+  //if(wheel_l_.cmd < 24.5)
+  //{
+  //  wheel_l_.vel = 0.0;
+  //}
+  //if(wheel_r_.cmd < 24.5)
+  //{
+  //  wheel_r_.vel = 0.0;
+  //}
+  //RCLCPP_INFO(
    //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
   
-  wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
+  wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
+
+  //RCLCPP_INFO(
+   //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read positions values: %f %f", wheel_l_.pos,  wheel_r_.pos);
   
   door_servo_.vel = 1;
   door_servo_.pos = 1;
@@ -272,23 +291,23 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
     return hardware_interface::return_type::ERROR;
   }
 
-  RCLCPP_DEBUG(
-    rclcpp::get_logger("DiffDriveArduinoHardware"), "Inital motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
-  bool wheel_l_neg = false;
-  bool wheel_r_neg = false;
-  if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
-  if (wheel_r_.cmd < 0.0) wheel_r_neg = true;
+  //RCLCPP_INFO(
+    //rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent Inital motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
+  //bool wheel_l_neg = false;
+  //bool wheel_r_neg = false;
+  //if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
+  //if (wheel_r_.cmd < 0.0) wheel_r_neg = true;
 
-  wheel_l_.cmd = std::abs(wheel_l_.cmd);
-  wheel_r_.cmd = std::abs(wheel_r_.cmd);
-  wheel_l_.cmd = wheel_l_.cmd * 16.52 + 24.5;
-  wheel_r_.cmd = wheel_r_.cmd * 16.52 + 24.5;
+  //wheel_l_.cmd = std::abs(wheel_l_.cmd);
+  //wheel_r_.cmd = std::abs(wheel_r_.cmd);
+  wheel_l_.cmd = wheel_l_.cmd * 23.8;
+  wheel_r_.cmd = wheel_r_.cmd * 23.8;
 
-    //RCLCPP_DEBUG(
+    //RCLCPP_INFO(
     //rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
-  if (wheel_l_neg) wheel_l_.cmd = -wheel_l_.cmd;
-  if (wheel_r_neg) wheel_r_.cmd = -wheel_r_.cmd;
-  comms_.set_motor_values(wheel_l_.cmd*1.02, wheel_r_.cmd);
+  //if (wheel_l_neg) wheel_l_.cmd = -wheel_l_.cmd;
+  //if (wheel_r_neg) wheel_r_.cmd = -wheel_r_.cmd;
+  comms_.set_motor_values(wheel_l_.cmd*1.03, wheel_r_.cmd);
 
   comms_.set_servo_door_values(door_servo_.cmd);
 

@@ -15,9 +15,9 @@ docker run -dit --name ros_vvv \
   -v /dev/bus/usb:/dev/bus/usb \
   leshrimpkiller/vvv:latest bash
 
+
 execute terminal in same container
 docker exec -it ros_vvv bash
-
 
 build docker image:
 docker build -t leshrimpkiller/vvv .

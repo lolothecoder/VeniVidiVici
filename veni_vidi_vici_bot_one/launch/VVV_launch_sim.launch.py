@@ -270,9 +270,9 @@ def generate_launch_description():
         delayed_controller_manager,
         delayed_diff_drive_spawner,
         delayed_joint_broad_spawner,
-        #delayed_door_servo_spawner,
-        #delayed_ramp_servo_spawner,
-        #delayed_collector_servo_spawner,
+        delayed_door_servo_spawner,
+        delayed_ramp_servo_spawner,
+        delayed_collector_servo_spawner,
 
 #        yolov6_launch,
 
