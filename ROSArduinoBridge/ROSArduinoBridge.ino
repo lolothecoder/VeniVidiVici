@@ -209,20 +209,6 @@ int runCommand() {
   return 0;
 }
 
-/* Helper: set grabber speed and direction. Negative = reverse.*/
-void setGrabberSpeed(int spd) {
-  unsigned char reverse = 0;
-  if (spd < 0) {
-    spd = -spd;
-    reverse = 1;
-  }
-  if (spd > MAX_PWM) {
-    spd = MAX_PWM;
-  }
-  analogWrite(GRABBER_PWM, spd);
-  digitalWrite(GRABBER_DIRECTION, reverse);
-}
-
 /* Setup function—runs once at startup. */
 void setup() {
   Serial.begin(BAUDRATE);
@@ -350,6 +336,7 @@ void loop() {
     lastA0state = currentA0;
   }
 
+
   // 7) Every CHECK_WINDOW ms, evaluate pulse count
   if (now - lastWindowTime >= CHECK_WINDOW) {
     unsigned long pulsesInWindow = pulseCount - lastWindowPulseCount;
@@ -369,21 +356,16 @@ void loop() {
   // 8) Drive grabber based on stuck‐state or normal operation
   if (now < reverseUntil) {
     // Still reversing
-    digitalWrite(GRABBER_ENABLE, LOW);  // enable driver
-    setGrabberSpeed(-DEFAULT_GRABBER_SPEED);
+    digitalWrite(GRABBER_DIRECTION, LOW);  // enable driver
   } else {
     // Normal forward operation (or resume)
     if (currentlyReversing) {
       currentlyReversing = false;
     }
-    digitalWrite(GRABBER_ENABLE, LOW);   // ensure driver is enabled
-    // If the user recently issued a GRABBER_RAW_PWM command, that speed was set in runCommand().
-    // We only override here if no recent command, so do nothing and let the last commanded speed hold.
-    // If you want always forward at DEFAULT_GRABBER_SPEED when not stuck, uncomment:
-    // setGrabberSpeed(DEFAULT_GRABBER_SPEED);
+    digitalWrite(GRABBER_DIRECTION, LOW);   // ensure driver is enabled
   }
-#endif
 
+#endif
 #ifdef USE_SERVOS
   for (int i = 0; i < N_SERVOS; i++) {
     servos[i].doSweep();
