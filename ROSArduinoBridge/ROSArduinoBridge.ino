@@ -61,6 +61,7 @@ char argv1[16];
 char argv2[16];
 long arg1;
 long arg2;
+bool collector_activated = false;
 
 /* Encoder/stuck‐detection specifics */
 #ifdef USE_BASE
@@ -177,6 +178,7 @@ int runCommand() {
       break;
     case GRABBER_RAW_PWM:
       lastGrabberCommand = millis();
+      collector_activated = true;
       setGrabberSpeed(arg1);
       Serial.println("OK");
       break;
@@ -311,22 +313,6 @@ void loop() {
     nextPID += PID_INTERVAL;
   }
 
-  // 3) Auto‐stop for drive motors
-  if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL) {
-    setMotorSpeeds(0, 0);
-    moving = 0;
-  }
-
-  // 4) Auto‐stop for grabber (if no grabber command recently)
-  if ((millis() - lastGrabberCommand) > AUTO_STOP_INTERVAL) {
-    setGrabberSpeed(0);
-  }
-
-  // 5) Auto‐stop for servos
-  if ((millis() - lastServoCommand) > AUTO_STOP_INTERVAL) {
-    setServo(0, 0);
-    setServo(1, 0);
-  }
 
   // 6) Stuck‐detection: poll A0 for edges
   unsigned long now = millis();
@@ -340,7 +326,7 @@ void loop() {
   // 7) Every CHECK_WINDOW ms, evaluate pulse count
   if (now - lastWindowTime >= CHECK_WINDOW) {
     unsigned long pulsesInWindow = pulseCount - lastWindowPulseCount;
-
+    Serial.println(pulsesInWindow);
     if (pulsesInWindow < MIN_PULSES) {
       // Stuck: schedule 2-second reversal
       reverseUntil = now + REVERSE_DURATION;
@@ -354,15 +340,32 @@ void loop() {
   }
 
   // 8) Drive grabber based on stuck‐state or normal operation
-  if (now < reverseUntil) {
+  if (now < reverseUntil && collector_activated) {
     // Still reversing
-    digitalWrite(GRABBER_DIRECTION, LOW);  // enable driver
+    setGrabberSpeed(-DEFAULT_GRABBER_SPEED);  // enable driver
   } else {
     // Normal forward operation (or resume)
     if (currentlyReversing) {
       currentlyReversing = false;
-    }
-    digitalWrite(GRABBER_DIRECTION, LOW);   // ensure driver is enabled
+    }  // ensure driver is enabled
+  
+    // 3) Auto‐stop for drive motors
+  if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL) {
+    setMotorSpeeds(0, 0);
+    moving = 0;
+  }
+
+  // 4) Auto‐stop for grabber (if no grabber command recently)
+  if ((millis() - lastGrabberCommand) > AUTO_STOP_INTERVAL) {
+    setGrabberSpeed(0);
+    collector_activated = false;
+  }
+
+  // 5) Auto‐stop for servos
+  if ((millis() - lastServoCommand) > AUTO_STOP_INTERVAL) {
+    setServo(0, 0);
+    setServo(1, 0);
+  }
   }
 
 #endif
