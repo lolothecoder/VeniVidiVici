@@ -137,6 +137,8 @@ def execute_S_STOP(self):
 def execute_SALL_READY(self):
 
     next_state = RobotState.SALL_READY
+    #self._publish_collector_servo_cmd(collector_command=[100.0])
+    #self._publish_door_servo_cmd(servo_command=[1.0])
 
     #----- Check for transition -----
 
@@ -206,7 +208,7 @@ def execute_SALL_READY(self):
     return next_state
 
 def execute_S1_MOVE_TO_P10(self):
-
+    self._publish_collector_servo_cmd(collector_command=[100.0])
     next_state = RobotState.S1_MOVE_TO_P10
 
     #----- Check for transition -----
@@ -320,7 +322,7 @@ def execute_S1_PRESS_BUTTON(self):
     
     elif self.align_button:
 
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.theta_prepare, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=True)
+        rotation_goal_reached, angular_z_mn = execute_rotation_camera(current_x = self.button_normalized_coord, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
 
         if not rotation_goal_reached:
 
@@ -340,7 +342,9 @@ def execute_S1_PRESS_BUTTON(self):
 
     elif self.approach_button:
 
-        trans_goal_reached, linear_x_mn = execute_translation_distance(self.remaining_distance, self.start_x, self.start_y, current_x, current_y, distance_tolerance=0.1, max_linear_speed=0.3, min_linear_speed=0.125)
+        #trans_goal_reached, linear_x_mn = execute_translation_distance(self.remaining_distance-0.2, self.start_x, self.start_y, current_x, current_y, distance_tolerance=0.1, max_linear_speed=0.3, min_linear_speed=0.125)
+
+        trans_goal_reached, linear_x_mn = execute_translation_lidar(self.front_distance, distance_tolerance=0.05, max_linear_speed=0.3, min_linear_speed=0.125)
 
         if not trans_goal_reached:
 

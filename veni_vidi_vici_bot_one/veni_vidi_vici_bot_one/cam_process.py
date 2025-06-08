@@ -31,8 +31,8 @@ class ImagePublisher(Node):
         # Publisher on /image_in:
         self.pub = self.create_publisher(Image, '/image_in', 10)
 
-        # Timer to grab frames at 20 Hz (adjust as needed)
-        timer_period = 1.0 / 5.0  # seconds
+        # Timer to grab frames at 5 Hz (adjust as needed)
+        timer_period = 1.0 / 20.0  # seconds
         self.timer = self.create_timer(timer_period, self.timer_callback)
         self.get_logger().info("ImagePublisher initialized, publishing at 20 Hz on /image_in.")
 

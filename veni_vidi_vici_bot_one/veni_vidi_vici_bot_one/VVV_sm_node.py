@@ -11,14 +11,14 @@ from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
 from rclpy.duration import Duration
 
-from geometry_msgs.msg import Twist, Point, PointStamped, PoseStamped, WrenchStamped
+from geometry_msgs.msg import Twist, Point, PointStamped, PoseStamped, WrenchStamped 
 from std_msgs.msg import Empty, Float64MultiArray
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, LaserScan
 from tf2_ros import TransformException, Buffer, TransformListener
 from tf2_ros.buffer import Buffer
 from tf2_ros.transform_listener import TransformListener
-from std_msgs.msg import Float64MultiArray
+from std_msgs.msg import Float64MultiArray, Float32
 
 from nav2_simple_commander.robot_navigator import BasicNavigator
 
@@ -117,6 +117,8 @@ class StateMachineNode(Node):
         self.align_with_duplo = False
         self.go_straight_to_duplo = False
         self.nav2_to_duplo        = False
+
+        self.button_normalized_coord = None
 
 
         self.wait_for_goal = False
@@ -238,13 +240,17 @@ class StateMachineNode(Node):
         self.ramp_pub      = self.create_publisher(Float64MultiArray, '/ramp_servo/commands', 10)
         self.collector_pub = self.create_publisher(Float64MultiArray, '/collector_servo/commands', 10)
 
+        self.button_image_run_pub = self.create_publisher(Float32, '/button_image_run', 10)
+
         #----- Create Subscribers -----
 
         self.start_sub = self.create_subscription(Empty,    '/start_signal', self.start_callback, 1 , callback_group=self._priority_callback_group)
 
         self.odom_sub = self.create_subscription(Odometry,  '/diff_cont/odom', self.odom_callback, 1, callback_group=self._default_callback_group)
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 1          , callback_group=self._default_callback_group)
+
         #self.yolov11_sub = self.create_subscription(Point,  '/detected_ball_3d_map', self.yolov11_callback, 10, callback_group=self._default_callback_group)
+        self.button_pose_sub = self.create_subscription(Float32, '/button_pose', self.button_pose_callback, 1, callback_group=self._default_callback_group )
 
         self.stop_sub = self.create_subscription(Empty,     '/stop_signal', self.stop_callback, 1   , callback_group=self._priority_callback_group)
 
@@ -687,6 +693,13 @@ class StateMachineNode(Node):
     #             self.nearest_duplo_x = None
     #             self.nearest_duplo_y = None           
 
+    def button_pose_callback(self, msg):
+
+        if msg.data > -2.0:
+
+            self.button_found = True
+            self.button_normalized_coord = msg.data
+
     #----- Define all the publisher functions -----
 
     def _publish_cmd_vel(self, linear_x=0.0, angular_z=0.0):
@@ -717,3 +730,11 @@ class StateMachineNode(Node):
         msg.data = collector_command
 
         self.collector_pub.publish(msg)
+
+    def _publish_button_image_cmd(self, command=0.0):
+
+        msg = Float32()
+        msg.data = command
+        self.button_image_run_pub.publish(msg)
+
+        

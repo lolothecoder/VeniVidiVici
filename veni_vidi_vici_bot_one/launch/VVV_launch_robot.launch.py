@@ -245,19 +245,32 @@ def generate_launch_description():
         condition=UnlessCondition(LaunchConfiguration('activate_sim'))
     )
 
+    button_pos_node = Node(
+        package=package_name,
+        executable='detect_button',
+        name='detect_button',
+        output='screen',
+        condition=UnlessCondition(LaunchConfiguration('activate_sim'))
+    )
+
     delayed_image_node = TimerAction(
-        period=15.0, 
+        period=5.0, 
         actions=[image_node]
     )
 
     delayed_duplo_node = TimerAction(
-        period=15.0, 
+        period=5.0, 
         actions=[duplo_node]
     )
 
     delayed_duplo_pos_node = TimerAction(
-        period=15.0, 
+        period=5.0, 
         actions=[duplo_pos_node]
+    )
+
+    delayed_button_pos_node = TimerAction(
+        period=5.0, 
+        actions=[button_pos_node]
     )
 
     #----- Launch state machine -----
@@ -288,8 +301,6 @@ def generate_launch_description():
         delayed_ramp_servo_spawner,
         delayed_collector_servo_spawner,
 
-#        yolov6_launch,
-
         activate_loc_arg,
         activate_nav_arg,
         activate_slam_arg,
@@ -303,8 +314,9 @@ def generate_launch_description():
         delayed_nav_launch,
         delayed_sm_node,
 
-        #delayed_image_node,
+        delayed_image_node,
         #delayed_duplo_node,
         #delayed_duplo_pos_node,
+        delayed_button_pos_node,
 
     ])

@@ -112,9 +112,9 @@ private:
   Servo collector_servo_;
 
   // our own ROS node handle & IMU publisher
-  rclcpp::Node::SharedPtr                          nh_;
-  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
-  sensor_msgs::msg::Imu                               imu_msg_;
+  //rclcpp::Node::SharedPtr                          nh_;
+  //rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
+  //sensor_msgs::msg::Imu                               imu_msg_;
 
 };
 

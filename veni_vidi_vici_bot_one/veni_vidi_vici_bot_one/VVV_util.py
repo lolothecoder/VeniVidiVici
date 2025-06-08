@@ -60,6 +60,25 @@ def execute_rotation(angle, current_theta, angle_tolerance=0.07, max_angular_spe
 
     return goal_reached, angular_z
 
+def execute_rotation_camera(current_x, angle_tolerance=0.07, max_angular_speed=0.5, min_angular_speed=0.1, control=True):
+
+    if control:
+
+        angular_speed = np.exp(np.abs(current_x)*2-1) * np.abs(max_angular_speed)
+        angular_speed = max(min(angular_speed, max_angular_speed), min_angular_speed)
+
+    else:
+
+        angular_speed = max_angular_speed
+
+    target_theta_speed = 0 if abs(current_x) < angle_tolerance else np.sign(-current_x) * np.abs(angular_speed)
+
+
+    goal_reached = abs(current_x) < angle_tolerance
+    angular_z    = target_theta_speed
+
+    return goal_reached, angular_z
+
 def execute_translation(des_x, des_y, current_x, current_y, current_yaw, distance_tolerance, max_linear_speed, min_linear_speed):
 
     current_distance_to_goal = np.sqrt((des_x - current_x) ** 2 + (des_y - current_y) ** 2)
@@ -87,6 +106,18 @@ def execute_translation_distance(distance, start_x, start_y, current_x, current_
     linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
 
     target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(distance) * linear_speed
+    goal_reached = current_distance_to_goal <= distance_tolerance
+        
+    return goal_reached, target_x_speed 
+
+def execute_translation_lidar(curr_dist, distance_tolerance, max_linear_speed, min_linear_speed):
+
+    current_distance_to_goal = curr_dist - 0.225
+
+    linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
+    linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
+
+    target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(curr_dist) * linear_speed
     goal_reached = current_distance_to_goal <= distance_tolerance
         
     return goal_reached, target_x_speed 

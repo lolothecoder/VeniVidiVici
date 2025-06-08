@@ -15,7 +15,7 @@
    #define GRABBER
    #define BATTERY
    #define CUSTOM_SERVOS
-   Adafruit_MPU6050 mpu;
+   //Adafruit_MPU6050 mpu;
 #endif
 
 #undef USE_SERVOS     // Disable use of PWM servos
@@ -197,15 +197,15 @@ int runCommand() {
       break;
     case GRABBER_RAW_PWM:
       lastGrabberCommand = millis();
-      collector_activated = true;
-      if (arg1 == 0) {
+      //collector_activated = true;
+     // if (arg1 == 0) {
     // user explicitly turned it off:
-    collector_activated  = false;
-    currentlyReversing   = false;
-    reverseUntil         = 0;
-  } else {
-    collector_activated = true;
-  }
+    //collector_activated  = false;
+    //currentlyReversing   = false;
+    //reverseUntil         = 0;
+  //} else {
+  //  collector_activated = true;
+  //}
   setGrabberSpeed(arg1);
       Serial.println("OK");
       break;
@@ -226,17 +226,17 @@ int runCommand() {
       Serial.println(right_speed);
       break;
     case GET_IMU:
-      Serial.print(a_x);
-      Serial.print(" ");
-      Serial.print(a_y);
-      Serial.print(" ");
-      Serial.print(a_z);
-      Serial.print(" ");
-      Serial.print(g_x);
-      Serial.print(" ");
-      Serial.print(g_y);
-      Serial.print(" ");
-      Serial.println(g_z);
+      //Serial.print(a_x);
+      //Serial.print(" ");
+      //Serial.print(a_y);
+      //Serial.print(" ");
+      //Serial.print(a_z);
+      //Serial.print(" ");
+      //Serial.print(g_x);
+      //Serial.print(" ");
+      //Serial.print(g_y);
+      //Serial.print(" ");
+      //Serial.println(g_z);
       break;
     case UPDATE_PID:
       while ((str = strtok_r(p, ":", &p)) != '\0') {
@@ -261,11 +261,11 @@ int runCommand() {
 /* Setup function—runs once at startup. */
 void setup() {
   Serial.begin(BAUDRATE);
-  Wire.begin();                    //  ← Initialize I²C bus
-  if (! mpu.begin()) {             //  ← Probe the sensor
-    Serial.println("Failed to find MPU6050!");
-    while (1) delay(10);
-  }
+  //Wire.begin();                    //  ← Initialize I²C bus
+  //if (! mpu.begin()) {             //  ← Probe the sensor
+  //  Serial.println("Failed to find MPU6050!");
+  //  while (1) delay(10);
+  //}
   pinMode(LEFT_ENABLE, OUTPUT);
   pinMode(LEFT_PWM, OUTPUT);
   pinMode(LEFT_DIRECTION, OUTPUT);
@@ -278,9 +278,9 @@ void setup() {
   pinMode(GRABBER_PWM, OUTPUT);
 
   pinMode(BATTERY_PIN, INPUT);
-  mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
-  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
-  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
+  //mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
+  //mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+  //mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 #ifdef USE_BASE
   #ifdef ARDUINO_ENC_COUNTER
     // Left encoder pins (directly on Arduino pins)
@@ -329,8 +329,8 @@ void setup() {
 
 /* Main loop: read serial, run commands, PID, auto‐stop, and stuck check */
 void loop() {
-  sensors_event_t a, g, temp;
-  mpu.getEvent(&a, &g, &temp);
+  //sensors_event_t a, g, temp;
+  //mpu.getEvent(&a, &g, &temp);
   // 1) Handle incoming serial commands
   while (Serial.available() > 0) {
     chr = Serial.read();
@@ -383,7 +383,7 @@ void loop() {
   // 7) Every CHECK_WINDOW ms, evaluate pulse count
   if (now - lastWindowTime >= CHECK_WINDOW) {
     unsigned long pulsesInWindow = pulseCount - lastWindowPulseCount;
-    Serial.println(pulsesInWindow);
+    //Serial.println(pulsesInWindow);
     if (pulsesInWindow < MIN_PULSES) {
       // Stuck: schedule 2-second reversal
       reverseUntil = now + REVERSE_DURATION;
@@ -432,12 +432,12 @@ void loop() {
     setServo(1, 0);
   }
   battery_level();
-  a_x = a.acceleration.x;
-  a_y = a.acceleration.y;
-  a_z = a.acceleration.z;
-  g_x = g.gyro.x;
-  g_y = g.gyro.y;
-  g_z = g.gyro.z;
+  //a_x = a.acceleration.x;
+  //a_y = a.acceleration.y;
+  //a_z = a.acceleration.z;
+  //g_x = g.gyro.x;
+  //g_y = g.gyro.y;
+  //g_z = g.gyro.z;
 #endif
 #ifdef USE_SERVOS
   for (int i = 0; i < N_SERVOS; i++) {

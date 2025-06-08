@@ -187,9 +187,9 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_configure(
 
   // ─── create our private node and IMU publisher ───────────────────
 
-  nh_ = std::make_shared<rclcpp::Node>("diffdrive_arduino_hw_node");
-  imu_pub_ = nh_->create_publisher<sensor_msgs::msg::Imu>(
-    "imu/data_raw", rclcpp::QoS(10));
+  //nh_ = std::make_shared<rclcpp::Node>("diffdrive_arduino_hw_node");
+  //imu_pub_ = nh_->create_publisher<sensor_msgs::msg::Imu>(
+  //  "imu/data_raw", rclcpp::QoS(10));
 
   RCLCPP_INFO(
   rclcpp::get_logger("DiffDriveArduinoHardware"),
@@ -260,22 +260,22 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
 
   comms_.get_values(wheel_l_.vel, wheel_r_.vel);
 
-  double ax, ay, az, gx, gy, gz;
+  //double ax, ay, az, gx, gy, gz;
 
-  comms_.get_imu(ax, ay, az, gx, gy, gz);
-  auto now = nh_->now();
+  //comms_.get_imu(ax, ay, az, gx, gy, gz);
+  //auto now = nh_->now();
 
-  imu_msg_.header.stamp = now;
-  imu_msg_.header.frame_id = "imu_link";
-  imu_msg_.linear_acceleration.x = ax;
-  imu_msg_.linear_acceleration.y = ay;
-  imu_msg_.linear_acceleration.z = az;
-  imu_msg_.angular_velocity.x = gx;
-  imu_msg_.angular_velocity.y = gy;
-  imu_msg_.angular_velocity.z = gz;
-  imu_msg_.orientation_covariance[0] = -1;  // indicate “unknown”
+  //imu_msg_.header.stamp = now;
+  //imu_msg_.header.frame_id = "imu_link";
+  //imu_msg_.linear_acceleration.x = ax;
+  //imu_msg_.linear_acceleration.y = ay;
+  //imu_msg_.linear_acceleration.z = az;
+  //imu_msg_.angular_velocity.x = gx;
+  //imu_msg_.angular_velocity.y = gy;
+  //imu_msg_.angular_velocity.z = gz;
+  //imu_msg_.orientation_covariance[0] = -1;  // indicate “unknown”
 
-  imu_pub_->publish(imu_msg_);
+  //imu_pub_->publish(imu_msg_);
 
   double delta_seconds = period.seconds();
 
