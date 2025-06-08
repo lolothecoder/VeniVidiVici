@@ -6,9 +6,12 @@ import os
 from enum import Enum
 
 from rclpy.node import Node
+from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 
-from geometry_msgs.msg import Twist, PointStamped, PoseStamped, WrenchStamped
+from rclpy.duration import Duration
+
+from geometry_msgs.msg import Twist, Point, PointStamped, PoseStamped, WrenchStamped
 from std_msgs.msg import Empty, Float64MultiArray
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import Imu, LaserScan
@@ -21,11 +24,12 @@ from nav2_simple_commander.robot_navigator import BasicNavigator
 
 from ament_index_python.packages import get_package_share_directory
 
+from rcl_interfaces.srv import SetParameters
+from rclpy.parameter import Parameter
+
+
 import numpy as np
 import math
-import time
-
-import serial
 
 from veni_vidi_vici_bot_one.VVV_util import *
 
@@ -37,18 +41,20 @@ class RobotState(Enum):
     S1_MOVE_TO_P10 = 2
     S1_PRESS_BUTTON = 3
     S1_MOVE_TO_P11 = 4
+    S1_EXIT_ROOM = 5
 
-    SALL_SEARCH_FOR_DUPLO = 5
-    SALL_MOVE_TO_DUPLO = 6
-    SALL_MOVE_TO_CLOSEST_CORNER = 7
-    SALL_RETURN_TO_S = 8
-    SALL_DELOAD = 9
+    SALL_SEARCH_FOR_DUPLO = 6
+    SALL_MOVE_TO_DUPLO = 7
+    SALL_MOVE_TO_CLOSEST_CORNER = 8
+    SALL_RETURN_TO_S = 9
+    SALL_DELOAD = 10
 
-    S2_MOVE_TO_P20 = 10
-    S2_MOVE_TO_P21 = 11
-    S2_ALIGN_ROBOT = 12
+    S3_MOVE_TO_P30 = 11
+    S3_MOVE_TO_P31 = 12
+    S3_ALIGN_ROBOT = 13
+    S3_EXIT_RAMP   = 14
 
-    S3 = 13
+    S_STOP = 15
 
 class StateMachineNode(Node):
 
@@ -61,10 +67,6 @@ class StateMachineNode(Node):
         self._priority_callback_group = MutuallyExclusiveCallbackGroup()
         self._default_callback_group  = MutuallyExclusiveCallbackGroup()
 
-        self._init_publishers_and_subscribers()
-        self._init_timers()    
-        self._init_navigator()
-
         #----- Initialize state machine -----
 
         self.state = RobotState.S0_BOOT
@@ -72,13 +74,19 @@ class StateMachineNode(Node):
         self.start = False
         self.stop  = False
 
+        self.N_mission1_executed = 0
+        self.N_mission2_executed = 0
+        self.N_mission3_executed = 0
+
         self.start_time = None
         self.elapsed_time = 0.0
         self.started_moving = False
 
+        self.running_timeout1 = False
+
         #----- Hardcoded values from .csv -----
 
-        self.initial_pose = None
+        self.S_pose = {}
 
         self.button_ = {}
 
@@ -98,20 +106,60 @@ class StateMachineNode(Node):
 
         self.front_distance = None
         self.left_distance  = None
+        self.right_distance  = None
+
+        self.list_of_visited_duplos = []
+
+        self.block_record = False
 
         #----- Mission 1 related state -----
 
+        self.align_with_duplo = False
+        self.go_straight_to_duplo = False
+        self.nav2_to_duplo        = False
+
+
         self.wait_for_goal = False
-        self.num_pass_narrow = 0.0
+        self.manual_recovery = False
+        self.adjust_position = False
+        self.adjust_orientation = False
+        self.previous_linear_x_mn = 0.0
+
+        self.number_of_recoveries = 0
+
+        self.prepare_press_button = True
+        self.button_attempts = 0.0
+        self.prepare_enter = True
+        self.align_enter = False
+        self.go_through_door = False
 
         self.S1_door_open = False
         self.num_press_attempt = 0.0
-
-        self.adjust_orientation = True
+        self.prepare_press_button = True
+        self.des_x_button = None
+        self.des_y_button = None
+        self.des_theta_button = None
+        self.door_thr_button = None
+        self.align_button = False
         self.approach_button = False
+        self.finished_action_time = None
+        self.wait_for_door_to_open = False
         self.verify_door_is_open = False
         self.go_back_button = False
+        self.des_x_ret = None
+        self.des_y_ret = None
+        self.match_door_orientation = False
         self.wait_scan_counter = 0.0
+
+        self.prepared_exit = False
+        self.prepare_x = None
+        self.prepare_y = None
+        self.prepare_theta = None
+        self.align_exit = False
+        self.match_exit_orientation = False
+        self.exit_x = None
+        self.exit_y = None
+        self.exit_theta = None
 
         self.turn_left = False
         self.turn_right = False
@@ -122,21 +170,52 @@ class StateMachineNode(Node):
         self.estimating_duplo_position = False
         self.duplo_found = False
         self.next_duplo = {}
+        self._best_dist = 10000
 
+        self.current_duplo_x = None
+        self.current_duplo_y = None
+        self.current_duplo_theta = None
         self.reached_duplo = False
 
+        self.choose_corner = True
         self.corner_x = None
         self.corner_y = None
         self.corner_theta = None
+        self.goal_theta = None
         self.corner_idx = None
-        self.corner_reached = False
+        self.align_corner = False
+        self.go_straight_to_corner = False
+        self.nav2_to_corner = False
+
         self.mission1_available_corners = None
         self.mission2_available_corners = None
         self.mission3_available_corners = None
+        self.match_corner_orientation = False
 
         self.number_of_duplos_collected = 0.0
+        self.duplos_capacity = 5
 
-        #----- Init state machine and the listener -----
+        self.start_deload = True
+
+        #----- Temporary -----
+
+        self.list_of_duplos_mission1 = []
+        self.list_of_duplos_mission2 = []
+        self.list_of_duplos_mission3 = []
+
+        #----- Initialize everything -----
+
+        self._init_publishers_and_subscribers()
+        self._init_timers()    
+        self._init_navigator()
+
+        #----- Connect to srv for cleaning costmap -----
+
+        self.get_logger().info('Costmap init !!')
+        self._init_costmap()
+        self.get_logger().info('Done costmap init !!')
+
+        #----- State machine -----
 
         self.initialized = self._init_state_machine()
 
@@ -163,13 +242,11 @@ class StateMachineNode(Node):
 
         self.start_sub = self.create_subscription(Empty,    '/start_signal', self.start_callback, 1 , callback_group=self._priority_callback_group)
 
-        self.imu_sub  = self.create_subscription(Imu,       '/imu/data', self.imu_callback, 1       , callback_group=self._default_callback_group)
         self.odom_sub = self.create_subscription(Odometry,  '/diff_cont/odom', self.odom_callback, 1, callback_group=self._default_callback_group)
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 1          , callback_group=self._default_callback_group)
+        #self.yolov11_sub = self.create_subscription(Point,  '/detected_ball_3d_map', self.yolov11_callback, 10, callback_group=self._default_callback_group)
 
         self.stop_sub = self.create_subscription(Empty,     '/stop_signal', self.stop_callback, 1   , callback_group=self._priority_callback_group)
-
-        #self.yolov6_sub = self.create_subscription(SpatialDetectionArray, '/color/yolov6_Spatial_detections', self.yolov6_callback, 10, callback_group=self._priority_callback_group)
 
     def _init_timers(self):
 
@@ -230,11 +307,46 @@ class StateMachineNode(Node):
 
         self.navigator.setInitialPose(initial_pose)
 
-        self.initial_pose = initial_pose
+    def _init_costmap(self):
+
+        self.local_costmap_client  = self.create_client(SetParameters, '/local_costmap/set_parameters')
+        self.global_costmap_client = self.create_client(SetParameters, '/global_costmap/set_parameters')
 
     #----- STATE MACHINE RELATED FUNCTIONS -----
 
     def _init_state_machine(self):
+
+        #----- Load S pose -----
+
+        try:
+            s_pose_csv_path = os.path.join(
+                get_package_share_directory('veni_vidi_vici_bot_one'),
+                'general',
+                'S_pose.csv'
+            )     
+
+            with open(s_pose_csv_path, mode='r') as csv_file:
+
+                reader = csv.DictReader(csv_file)
+                row = next(reader)  # Only one row expected
+
+                s_x = float(row['x'])
+                s_y = float(row['y'])
+                s_theta = float(row['theta'])
+
+            self.get_logger().info("SUCCESFULLY LOADED S POSE") 
+
+        except Exception as e:   
+
+            self.get_logger().info("FAILED TO LOAD S POSE")  
+
+            s_x = 0.0
+            s_y = 0.0
+            s_theta = -np.pi/4  
+
+        self.S_pose['x'] = s_x
+        self.S_pose['y'] = s_y
+        self.S_pose['theta'] = s_theta
 
         #----- Load the timeout thrs -----
 
@@ -260,9 +372,9 @@ class StateMachineNode(Node):
 
             self.get_logger().info("FAILED TO LOAD TIMEOUTS")  
 
-            t1 = 60.0
-            t2 = 120.0
-            t3 = 240.0  
+            t1 = 210.0
+            t2 = 390.0
+            t3 = 540.0  
 
         self.list_of_timeouts.append(t1)
         self.list_of_timeouts.append(t2)
@@ -388,7 +500,74 @@ class StateMachineNode(Node):
             self.get_logger().info("FAILED TO LOAD BUTTON PRESS POSE") 
 
         return len(self.list_of_timeouts) == 3 and len(self.list_of_corners_Z1) == 5 and len(self.list_of_corners_Z2) == 5 and len(self.list_of_corners_Z3) == 5
+
+    def _mission1_reset_params(self):
+
+        self.wait_for_goal = False
+        self.manual_recovery = False
+        self.previous_linear_x_mn = 0.0
+
+        self.number_of_recoveries = 0
+
+        self.mission1_abandoned = False
+        self.S1_door_open = False
+        self.num_press_attempt = 0.0
+        self.align_button = True
+        self.approach_button = False
+        self.verify_door_is_open = False
+        self.go_back_button = False
+        self.wait_scan_counter = 0.0
+        self.prepared_exit = False
+        self.prepare_x = None
+        self.prepare_y = None
+        self.prepare_theta = None
+        self.align_exit = False
+        self.match_exit_orientation = False
+        self.exit_x = None
+        self.exit_y = None
+        self.exit_theta = None
+
+        self.adjust_orientation = False
+
+        self.turn_left = False
+        self.turn_right = False
+        self.turn_mid = False
+        self.des_theta_left = None
+        self.des_theta_right = None
+        self.des_theta_mid = None
+        self.estimating_duplo_position = False
+        self.duplo_found = False
+        self.next_duplo = {}
+
+        self.current_duplo_x = None
+        self.current_duplo_y = None
+        self.current_duplo_theta = None
+        self.reached_duplo = False
+
+        self.corner_x = None
+        self.corner_y = None
+        self.corner_theta = None
+        self.corner_idx = None
+        self.corner_reached = False
+        self.match_corner_orientation = False
     
+    def disable_costmaps(self):
+
+        self.set_costmap_enabled(self.local_costmap_client, False)
+        self.set_costmap_enabled(self.global_costmap_client, False)
+
+    def enable_costmaps(self):
+
+        self.set_costmap_enabled(self.local_costmap_client, True)
+        self.set_costmap_enabled(self.global_costmap_client, True)
+
+    def set_costmap_enabled(self, client, enabled: bool):
+
+        param = Parameter(name='obstacle_layer.enabled', value=enabled)
+        req = SetParameters.Request()
+        req.parameters = [param.to_parameter_msg()]
+        future = client.call_async(req)
+
     def step(self):
 
         if   self.state == RobotState.S0_BOOT:
@@ -402,16 +581,16 @@ class StateMachineNode(Node):
         elif self.state == RobotState.S1_MOVE_TO_P10: 
 
             next_state = self.execute_S1_MOVE_TO_P10()
-
+            
         elif self.state == RobotState.S1_PRESS_BUTTON:
 
             next_state = self.execute_S1_PRESS_BUTTON()
 
-        elif self.state == RobotState.S1_MOVE_TO_P11:
+        else:
 
-            next_state = self.execute_S1_MOVE_TO_P11()
+            next_state = RobotState.S_STOP
 
-        self.state = next_state
+        #----- ADD NEW STATES -----
 
         #----- Update elapsed time -----
 
@@ -421,6 +600,8 @@ class StateMachineNode(Node):
             elapsed_time = current_time - self.start_time
 
             self.elapsed_time = elapsed_time.nanoseconds * 1e-9
+
+        self.state = next_state
 
     #----- Define all the callbacks -----
 
@@ -442,10 +623,6 @@ class StateMachineNode(Node):
 
         self.costmap = self.navigator.getGlobalCostmap()
 
-    def imu_callback(self, msg):
-
-        pitch, _, _ = quaternion_to_euler(msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w)
-
     def odom_callback(self, msg):
 
         _,_,yaw = quaternion_to_euler(msg.pose.pose.orientation.x, msg.pose.pose.orientation.y, msg.pose.pose.orientation.z, msg.pose.pose.orientation.w)
@@ -457,6 +634,9 @@ class StateMachineNode(Node):
 
         left_index = int((1.57 - msg.angle_min) / msg.angle_increment)
         self.left_distance = msg.ranges[left_index]
+
+        right_index = int((-1.57 - msg.angle_min) / msg.angle_increment)
+        self.right_distance = msg.ranges[right_index]
 
     def start_callback(self, msg):
 
@@ -470,9 +650,42 @@ class StateMachineNode(Node):
 
         self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
 
- #   def yolov6_callback(self, msg):
+    # def yolov11_callback(self, msg: Point):
 
- #       return
+    #     if self.state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.SALL_MOVE_TO_CLOSEST_CORNER, RobotState.S1_MOVE_TO_P11] and not self.block_record:  #, RobotState.S1_MOVE_TO_P11
+
+    #         #----- If this detection is closer than any before and duplo not taken already, remember it
+
+    #         dx, dy = msg.x, msg.y
+
+    #         not_already_visited = True
+
+    #         for duplo in self.list_of_visited_duplos:
+
+    #             dist_duplo = math.hypot(dx - duplo['x'], dy - duplo['y'])
+    #             if dist_duplo < 0.5: 
+                    
+    #                 not_already_visited = False
+    #                 break
+            
+    #         if not_already_visited:
+
+    #             rx = self.trans.transform.translation.x
+    #             ry = self.trans.transform.translation.y
+
+    #             dist = math.hypot(dx - rx, dy - ry)
+            
+    #             if dist < self._best_dist:
+
+    #                 self._best_dist      = dist
+    #                 self.nearest_duplo_x = dx
+    #                 self.nearest_duplo_y = dy
+
+    #     else:
+
+    #             self._best_dist      = 10000
+    #             self.nearest_duplo_x = None
+    #             self.nearest_duplo_y = None           
 
     #----- Define all the publisher functions -----
 

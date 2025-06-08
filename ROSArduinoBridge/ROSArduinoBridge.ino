@@ -1,5 +1,7 @@
 #include <Servo.h>
-
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_Sensor.h>
+#include <Wire.h>
 /*********************************************************************
  *  ROSArduinoBridge
  *  ...
@@ -13,6 +15,7 @@
    #define GRABBER
    #define BATTERY
    #define CUSTOM_SERVOS
+   Adafruit_MPU6050 mpu;
 #endif
 
 #undef USE_SERVOS     // Disable use of PWM servos
@@ -62,6 +65,20 @@ char argv2[16];
 long arg1;
 long arg2;
 bool collector_activated = false;
+float left_speed = 0;
+float right_speed = 0;
+float voltage_battery = 0;
+float a_x = 0; float a_y = 0; float a_z = 0;
+float g_x = 0; float g_y = 0; float g_z = 0;
+
+void battery_level(){
+        float value = analogRead(BATTERY_PIN);
+        float pin_volt = value / MAX_ARD_VAL * MAX_PIN_VAL;
+        float true_bat_volt = pin_volt * (R7 + R8) / R8;
+        //Serial.println("Battery Voltage:");
+        //Serial.println(true_bat_volt);
+        voltage_battery = true_bat_volt;  // Store for later use
+    }
 
 /* Encoder/stuck‐detection specifics */
 #ifdef USE_BASE
@@ -174,22 +191,52 @@ int runCommand() {
       resetPID();
       moving = 0; // temporarily disable PID
       setMotorSpeeds(arg1, arg2);
+      left_speed  = arg1;
+      right_speed = arg2;
       Serial.println("OK");
       break;
     case GRABBER_RAW_PWM:
       lastGrabberCommand = millis();
       collector_activated = true;
-      setGrabberSpeed(arg1);
+      if (arg1 == 0) {
+    // user explicitly turned it off:
+    collector_activated  = false;
+    currentlyReversing   = false;
+    reverseUntil         = 0;
+  } else {
+    collector_activated = true;
+  }
+  setGrabberSpeed(arg1);
       Serial.println("OK");
       break;
     case BATTERY_LEVEL:
       battery_level();
+      Serial.print("Battery Voltage: ");
+      Serial.println(voltage_battery);
       Serial.println("OK");
       break;
     case ACTIVATE_SERVO:
       lastServoCommand = millis();
       setServo(arg1, arg2);
       Serial.println("OK");
+      break;
+    case GET_INFO:
+      Serial.print(left_speed);
+      Serial.print(" ");
+      Serial.println(right_speed);
+      break;
+    case GET_IMU:
+      Serial.print(a_x);
+      Serial.print(" ");
+      Serial.print(a_y);
+      Serial.print(" ");
+      Serial.print(a_z);
+      Serial.print(" ");
+      Serial.print(g_x);
+      Serial.print(" ");
+      Serial.print(g_y);
+      Serial.print(" ");
+      Serial.println(g_z);
       break;
     case UPDATE_PID:
       while ((str = strtok_r(p, ":", &p)) != '\0') {
@@ -214,7 +261,11 @@ int runCommand() {
 /* Setup function—runs once at startup. */
 void setup() {
   Serial.begin(BAUDRATE);
-
+  Wire.begin();                    //  ← Initialize I²C bus
+  if (! mpu.begin()) {             //  ← Probe the sensor
+    Serial.println("Failed to find MPU6050!");
+    while (1) delay(10);
+  }
   pinMode(LEFT_ENABLE, OUTPUT);
   pinMode(LEFT_PWM, OUTPUT);
   pinMode(LEFT_DIRECTION, OUTPUT);
@@ -227,7 +278,9 @@ void setup() {
   pinMode(GRABBER_PWM, OUTPUT);
 
   pinMode(BATTERY_PIN, INPUT);
-
+  mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
+  mpu.setGyroRange(MPU6050_RANGE_250_DEG);
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
 #ifdef USE_BASE
   #ifdef ARDUINO_ENC_COUNTER
     // Left encoder pins (directly on Arduino pins)
@@ -270,11 +323,14 @@ void setup() {
       servoInitPosition[i]
     );
   }
+  delay(100);
 #endif
 }
 
 /* Main loop: read serial, run commands, PID, auto‐stop, and stuck check */
 void loop() {
+  sensors_event_t a, g, temp;
+  mpu.getEvent(&a, &g, &temp);
   // 1) Handle incoming serial commands
   while (Serial.available() > 0) {
     chr = Serial.read();
@@ -315,7 +371,8 @@ void loop() {
 
 
   // 6) Stuck‐detection: poll A0 for edges
-  unsigned long now = millis();
+  if(collector_activated){
+    unsigned long now = millis();
   uint8_t currentA0 = digitalRead(ENCODER_A_PIN);
   if (currentA0 != lastA0state) {
     pulseCount++;
@@ -340,18 +397,24 @@ void loop() {
   }
 
   // 8) Drive grabber based on stuck‐state or normal operation
-  if (now < reverseUntil && collector_activated) {
+  if (now < reverseUntil) {
     // Still reversing
     setGrabberSpeed(-DEFAULT_GRABBER_SPEED);  // enable driver
   } else {
     // Normal forward operation (or resume)
     if (currentlyReversing) {
       currentlyReversing = false;
+      collector_activated = false;  // reset state
     }  // ensure driver is enabled
+  }
   
-    // 3) Auto‐stop for drive motors
+  }
+
+      // 3) Auto‐stop for drive motors
   if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL) {
     setMotorSpeeds(0, 0);
+    left_speed  = 0;
+    right_speed = 0;
     moving = 0;
   }
 
@@ -359,6 +422,8 @@ void loop() {
   if ((millis() - lastGrabberCommand) > AUTO_STOP_INTERVAL) {
     setGrabberSpeed(0);
     collector_activated = false;
+    currentlyReversing  = false;
+    reverseUntil        = 0;
   }
 
   // 5) Auto‐stop for servos
@@ -366,12 +431,19 @@ void loop() {
     setServo(0, 0);
     setServo(1, 0);
   }
-  }
-
+  battery_level();
+  a_x = a.acceleration.x;
+  a_y = a.acceleration.y;
+  a_z = a.acceleration.z;
+  g_x = g.gyro.x;
+  g_y = g.gyro.y;
+  g_z = g.gyro.z;
 #endif
 #ifdef USE_SERVOS
   for (int i = 0; i < N_SERVOS; i++) {
     servos[i].doSweep();
   }
+
+  
 #endif
 }

@@ -28,12 +28,16 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp/time.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include "rclcpp_lifecycle/lifecycle_node.hpp"  
+#include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rclcpp_lifecycle/state.hpp"
 #include "diffdrive_arduino/visibility_control.h"
+#include <rclcpp/rclcpp.hpp>
 
 #include "diffdrive_arduino/arduino_comms.hpp"
 #include "diffdrive_arduino/wheel.hpp"
 #include "diffdrive_arduino/servo.hpp"
+#include <sensor_msgs/msg/imu.hpp>
 
 namespace diffdrive_arduino
 {
@@ -96,7 +100,7 @@ public:
   DIFFDRIVE_ARDUINO_PUBLIC
   hardware_interface::return_type write(
     const rclcpp::Time & time, const rclcpp::Duration & period) override;
-
+  
 private:
 
   ArduinoComms comms_;
@@ -106,6 +110,11 @@ private:
   Servo door_servo_;
   Servo ramp_servo_;
   Servo collector_servo_;
+
+  // our own ROS node handle & IMU publisher
+  rclcpp::Node::SharedPtr                          nh_;
+  rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_pub_;
+  sensor_msgs::msg::Imu                               imu_msg_;
 
 };
 

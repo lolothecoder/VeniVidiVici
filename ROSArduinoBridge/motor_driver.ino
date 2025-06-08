@@ -19,7 +19,7 @@
     unsigned char reverse = 0;
     
     if (abs(spd) < MIN_PWM){
-      spd = MIN_PWM;
+      //spd = MIN_PWM;
       if (i == LEFT){
         digitalWrite(LEFT_ENABLE, LOW);
       } else {
@@ -45,8 +45,8 @@
       }
     }
     if (spd > MAX_PWM)
-      spd = MAX_PWM;
-    
+      //spd = MAX_PWM;
+    spd = map(spd, 0, MAX_SPEED, MIN_PWM, MAX_PWM);
     if (i == LEFT) { 
       if      (reverse == 0) { 
         analogWrite(LEFT_PWM, spd); 

@@ -25,7 +25,7 @@ def generate_launch_description():
     activate_loc_arg  = DeclareLaunchArgument('activate_loc' , default_value='false', description='Flag to activate localisation')
     activate_cam_arg  = DeclareLaunchArgument('activate_cam' , default_value='false', description='Flag to activate camera')
     activate_sm_arg   = DeclareLaunchArgument('activate_sm'  , default_value='false', description='Flag to activate state machine')
-    activate_sim_arg  = DeclareLaunchArgument('activate_sim'  , default_value='false', description='Flag to activate simulation')
+    activate_sim_arg  = DeclareLaunchArgument('activate_sim' , default_value='false', description='Flag to activate simulation')
 
 
     # Include the robot_state_publisher launch file, provided by our own package. Force sim time to be enabled
@@ -80,6 +80,7 @@ def generate_launch_description():
         package="controller_manager",
         executable="spawner",
         arguments=["diff_cont"],
+        remappings=[('/diff_cont/odom', '/odom')],
     )
 
     delayed_diff_drive_spawner = RegisterEventHandler(
@@ -141,19 +142,11 @@ def generate_launch_description():
         )
     )
 
-    #----- Launch camera -----
-
-    # yolov6_launch = IncludeLaunchDescription(
-    #     PythonLaunchDescriptionSource([os.path.join(
-    #         get_package_share_directory('oakd_cam'), 'launch', 'yolov6_publisher.launch.py')]),
-    #     condition=IfCondition(LaunchConfiguration('activate_cam'))
-    # )   
-
     #----- Launch SLAM toolbox -----
 
     slam_toolbox_launch_description = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
-            os.path.join(get_package_share_directory('slam_toolbox'), 'launch', 'online_async_launch.py')
+            os.path.join(get_package_share_directory(package_name), 'launch', 'online_async_launch.py')
         ]),
         launch_arguments={
             'params_file': os.path.join(get_package_share_directory(package_name), 'config', 'mapper_params_online_async.yaml'),
@@ -186,6 +179,25 @@ def generate_launch_description():
         actions=[loc_launch_description]
     )    
 
+    #----- Launch keepout filter -----
+    
+    cost_launch_description = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource([
+            os.path.join(get_package_share_directory(package_name), 'launch', 'costmap_filter_info.launch.py')
+        ]),
+        launch_arguments={
+            'params_file': os.path.join(get_package_share_directory(package_name), 'config', 'costmap_params.yaml'),
+            'mask':os.path.join(get_package_share_directory(package_name), 'maps', 'my_map_save_keepout.yaml'),
+            'use_sim_time': 'false'
+        }.items(),
+        condition=IfCondition(LaunchConfiguration('activate_nav'))
+    )
+
+    delayed_cost_launch = TimerAction(
+        period=10.0, 
+        actions=[cost_launch_description]
+    )
+
     #----- Launch navigation -----
 
     nav_launch_description = IncludeLaunchDescription(
@@ -200,6 +212,8 @@ def generate_launch_description():
         }.items(),
         condition=IfCondition(LaunchConfiguration('activate_nav'))
     )
+
+    #----- Launch duplo detection -----
 
     delayed_nav_launch = TimerAction(
         period=10.0, 
@@ -285,6 +299,7 @@ def generate_launch_description():
 
         delayed_slam_launch,
         delayed_loc_launch,
+        delayed_cost_launch,
         delayed_nav_launch,
         delayed_sm_node,
 

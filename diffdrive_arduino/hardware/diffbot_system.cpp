@@ -23,6 +23,7 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/rclcpp.hpp"
 
+
 namespace diffdrive_arduino
 {
 hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_init(
@@ -180,13 +181,19 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_configure(
     comms_.disconnect();
   }
   comms_.connect(cfg_.device, cfg_.baud_rate, cfg_.timeout_ms);
-
-    // <— Zero out both wheel positions so read() logs start at 0
-  wheel_l_.pos = 0.0;
-  wheel_r_.pos = 0.0;
   
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Successfully configured!");
 
+
+  // ─── create our private node and IMU publisher ───────────────────
+
+  nh_ = std::make_shared<rclcpp::Node>("diffdrive_arduino_hw_node");
+  imu_pub_ = nh_->create_publisher<sensor_msgs::msg::Imu>(
+    "imu/data_raw", rclcpp::QoS(10));
+
+  RCLCPP_INFO(
+  rclcpp::get_logger("DiffDriveArduinoHardware"),
+  "Successfully configured!");
   return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -207,8 +214,8 @@ hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_cleanup(
 hardware_interface::CallbackReturn DiffDriveArduinoHardware::on_activate(
   const rclcpp_lifecycle::State & /*previous_state*/)
 {
-  wheel_l_.pos = 0.0;
-  wheel_r_.pos = 0.0;
+  //wheel_l_.pos = 0.0;
+  //wheel_r_.pos = 0.0;
   RCLCPP_INFO(rclcpp::get_logger("DiffDriveArduinoHardware"), "Activating ...please wait...");
   if (!comms_.connected())
   {
@@ -240,7 +247,6 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
     return hardware_interface::return_type::ERROR;
   }
 
-  double delta_seconds = period.seconds();
   //bool wheel_l_neg = false;
   //bool wheel_r_neg = false;
   //if (wheel_l_.cmd < 0.0) wheel_l_neg =true;
@@ -251,8 +257,28 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
 
   //wheel_l_.vel = (wheel_l_.cmd-24.5) / 16.52;
   //wheel_r_.vel = (wheel_r_.cmd-24.5) / 16.52;
-  wheel_l_.vel = wheel_l_.cmd / 23.8;
-  wheel_r_.vel = wheel_r_.cmd / 23.8;
+
+  comms_.get_values(wheel_l_.vel, wheel_r_.vel);
+
+  double ax, ay, az, gx, gy, gz;
+
+  comms_.get_imu(ax, ay, az, gx, gy, gz);
+  auto now = nh_->now();
+
+  imu_msg_.header.stamp = now;
+  imu_msg_.header.frame_id = "imu_link";
+  imu_msg_.linear_acceleration.x = ax;
+  imu_msg_.linear_acceleration.y = ay;
+  imu_msg_.linear_acceleration.z = az;
+  imu_msg_.angular_velocity.x = gx;
+  imu_msg_.angular_velocity.y = gy;
+  imu_msg_.angular_velocity.z = gz;
+  imu_msg_.orientation_covariance[0] = -1;  // indicate “unknown”
+
+  imu_pub_->publish(imu_msg_);
+
+  double delta_seconds = period.seconds();
+
   //if (wheel_l_neg) wheel_l_.vel = -wheel_l_.vel;
   //if (wheel_r_neg) wheel_r_.vel = -wheel_r_.vel;
 
@@ -264,19 +290,21 @@ hardware_interface::return_type DiffDriveArduinoHardware::read(
   //{
   //  wheel_r_.vel = 0.0;
   //}
-  //RCLCPP_INFO(
-   //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
+
   //allo woohooo
   // lots of code
   wheel_r_.pos = wheel_r_.vel*delta_seconds + wheel_r_.pos;
   wheel_l_.pos = wheel_l_.vel*delta_seconds + wheel_l_.pos;
+
+  //RCLCPP_INFO(
+   //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read motor values: %f %f", wheel_l_.vel, wheel_r_.vel);
+  
   int i = 0;
   int e = 0;
   int f = 0;
-  int g = 0;
 
   //RCLCPP_INFO(
-   //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read positions values: %f %f", wheel_l_.pos,  wheel_r_.pos);
+   //rclcpp::get_logger("DiffDriveArduinoHardware"), "Read positions values: %f %f", wheel_l_.vel,  wheel_r_.vel);
   
   door_servo_.vel = 1;
   door_servo_.pos = 1;
@@ -307,14 +335,14 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
 
   //wheel_l_.cmd = std::abs(wheel_l_.cmd);
   //wheel_r_.cmd = std::abs(wheel_r_.cmd);
-  wheel_l_.cmd = wheel_l_.cmd * 23.8;
-  wheel_r_.cmd = wheel_r_.cmd * 23.8;
+  wheel_l_.cmd = wheel_l_.cmd*60.0*60.0/(2*M_PI);
+  wheel_r_.cmd = wheel_r_.cmd*60.0*60.0/(2*M_PI)*1.03;
 
     //RCLCPP_INFO(
     //rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
   //if (wheel_l_neg) wheel_l_.cmd = -wheel_l_.cmd;
   //if (wheel_r_neg) wheel_r_.cmd = -wheel_r_.cmd;
-  comms_.set_motor_values(wheel_l_.cmd*1.03, wheel_r_.cmd);
+  comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
 
   comms_.set_servo_door_values(door_servo_.cmd);
 

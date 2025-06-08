@@ -166,12 +166,81 @@
       <inertia ixx="2.5000000000000006e-06" ixy="0.0" ixz="0.0" iyy="2.5000000000000006e-06" iyz="0.0" izz="2.5000000000000006e-06"/>
     </inertial>
   </link>
+  <!-- DOOR LINK -->
+  <joint name="door_joint" type="continuous">
+    <origin rpy="1.57 0 0" xyz="-0.20 0.13 0.13"/>
+    <parent link="base_link"/>
+    <child link="door_servo_frame"/>
+  </joint>
+  <link name="door_servo_frame">
+    <visual>
+      <geometry>
+        <cylinder length="0.005" radius="0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.051"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.04021467988426049"/>
+      <inertia ixx="4e-05" ixy="-0.0" ixz="0.0" iyy="7e-05" iyz="0.0" izz="4e-05"/>
+    </inertial>
+  </link>
+  <!-- RAMP LINK -->
+  <joint name="ramp_joint" type="continuous">
+    <origin rpy="1.57 0 0" xyz="-0.40 0.13 0.13"/>
+    <parent link="base_link"/>
+    <child link="ramp_servo_frame"/>
+  </joint>
+  <link name="ramp_servo_frame">
+    <visual>
+      <geometry>
+        <cylinder length="0.005" radius="0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.051"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.04021467988426049"/>
+      <inertia ixx="4e-05" ixy="-0.0" ixz="0.0" iyy="7e-05" iyz="0.0" izz="4e-05"/>
+    </inertial>
+  </link>
+  <!-- COLLECTOR LINK -->
+  <joint name="collector_joint" type="continuous">
+    <origin rpy="1.57 0 0" xyz="0.20 0.13 0.13"/>
+    <parent link="base_link"/>
+    <child link="collector_servo_frame"/>
+  </joint>
+  <link name="collector_servo_frame">
+    <visual>
+      <geometry>
+        <cylinder length="0.005" radius="0.01"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.051"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.04021467988426049"/>
+      <inertia ixx="4e-05" ixy="-0.0" ixz="0.0" iyy="7e-05" iyz="0.0" izz="4e-05"/>
+    </inertial>
+  </link>
   <!-- THIS PLUGIN IS OUR HARDWARE INTERFACE FOR THE CONTROLLER MANAGER -->
   <ros2_control name="RealRobot" type="system">
     <hardware>
       <plugin>diffdrive_arduino/DiffDriveArduinoHardware</plugin>
       <param name="left_wheel_name">left_wheel_joint</param>
       <param name="right_wheel_name">right_wheel_joint</param>
+      <param name="door_servo_name">door_joint</param>
+      <param name="ramp_servo_name">ramp_joint</param>
+      <param name="collector_servo_name">collector_joint</param>
       <param name="loop_rate">30</param>
       <param name="device">/dev/ttyACM0</param>
       <param name="baud_rate">57600</param>
@@ -184,16 +253,40 @@
     </hardware>
     <joint name="left_wheel_joint">
       <command_interface name="velocity">
-        <param name="min">-10</param>
-        <param name="max">10</param>
+        <param name="min">-20</param>
+        <param name="max">20</param>
       </command_interface>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
     </joint>
     <joint name="right_wheel_joint">
       <command_interface name="velocity">
-        <param name="min">-10</param>
-        <param name="max">10</param>
+        <param name="min">-20</param>
+        <param name="max">20</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="door_joint">
+      <command_interface name="velocity">
+        <param name="min">-5</param>
+        <param name="max">5</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="ramp_joint">
+      <command_interface name="velocity">
+        <param name="min">-5</param>
+        <param name="max">5</param>
+      </command_interface>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="collector_joint">
+      <command_interface name="velocity">
+        <param name="min">-5</param>
+        <param name="max">5</param>
       </command_interface>
       <state_interface name="position"/>
       <state_interface name="velocity"/>
@@ -202,7 +295,7 @@
   <joint name="laser_joint" type="fixed">
     <parent link="chassis"/>
     <child link="laser_frame"/>
-    <origin rpy="0 0 0" xyz="0.445 0 0.28"/>
+    <origin rpy="0 0 0" xyz="0.445 0.04 0.28"/>
   </joint>
   <link name="laser_frame">
     <visual>
@@ -232,7 +325,7 @@
   <joint name="camera_joint" type="fixed">
     <parent link="chassis"/>
     <child link="camera_link"/>
-    <origin rpy="0 0.436332 0" xyz="0.6 0 0.235"/>
+    <origin rpy="0 0.436332 0" xyz="0.615 0 0.24"/>
   </joint>
   <link name="camera_link">
     <visual>

@@ -21,7 +21,7 @@ STOP_SPEED      = 0
 ARDUINO_BOOT_DELAY = 2.0  # seconds
 
 # How long to wait (in seconds) for a keypress before sending stop
-IDLE_TIMEOUT = 0.1
+IDLE_TIMEOUT = 5
 
 # Interval (in seconds) to resend "h 0 1" to keep door open (must be < 2s)
 DOOR_KEEPALIVE_INTERVAL = 1.0
@@ -36,7 +36,7 @@ RAMP_KEEPALIVE_INTERVAL = 1.0
 
 def _get_key_nonblocking(timeout=IDLE_TIMEOUT):
     """
-    Wait up to `timeout` seconds for one keypress.
+    Wait up to timeout seconds for one keypress.
     Returns:
       - A single-character string if a key was pressed,
       - '' (empty string) if timeout elapsed with no key.
@@ -57,7 +57,7 @@ def _get_key_nonblocking(timeout=IDLE_TIMEOUT):
 def send_drive_command(ser, left_val, right_val):
     """
     Send exactly: b"o <left_val> <right_val>\r"
-    over the already-opened Serial object `ser`.
+    over the already-opened Serial object ser.
     """
     left_val = left_val * 1.038
     cmd = f"o {left_val} {right_val}\r"
@@ -199,8 +199,8 @@ def main():
 
             elif ch in ("k", ";"):
                 # Activate grabber: send immediately and start keepalive
-                send_grabber_command(ser, -100)
-                print("→ grabber on (sent 'g -100')")
+                send_grabber_command(ser, 100)
+                print("→ grabber on (sent 'g 100')")
                 grabber_active = True
                 last_grabber_time = current_time
 
@@ -253,7 +253,7 @@ def main():
 
             # ─── GRABBER KEEPALIVE LOGIC ─────────────────────────────────────
             if grabber_active and (current_time - last_grabber_time >= GRABBER_KEEPALIVE_INTERVAL):
-                send_grabber_command(ser, -100)
+                send_grabber_command(ser, 100)
                 last_grabber_time = current_time
 
             # ─── RAMP KEEPALIVE LOGIC ───────────────────────────────────────
@@ -274,3 +274,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

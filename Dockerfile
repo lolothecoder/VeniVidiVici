@@ -32,8 +32,14 @@ RUN pip3 uninstall -y numpy
 
 RUN apt install --reinstall python3-numpy=1:1.21.5-1ubuntu22.04.1
 
-RUN apt-get update && apt install -y nano ros-humble-tf-transformations
+RUN apt update && apt install -y ros-humble-robot-localization
 
+RUN apt-get update && apt install -y nano ros-humble-tf-transformations
+RUN apt-get update && apt install -y nano \
+    ros-humble-nav2-costmap-2d \
+    ros-humble-nav2-map-server \
+    ros-humble-nav2-mppi-controller \
+    && rm -rf /var/lib/apt/lists/*
 COPY config/ /site_config/
 
 ARG USERNAME=ros
@@ -69,6 +75,12 @@ COPY diffdrive_arduino /root/ros_ws/src/diffdrive_arduino
 
 COPY ROSArduinoBridge /root/ros_ws/src/ROSArduinoBridge
 
+COPY rf2o_laser_odometry /root/ros_ws/src/rf2o_laser_odometry
+
+WORKDIR /root/ros_ws
+RUN /bin/bash -c "cp src/veni_vidi_vici_bot_one/config/bt.xml /opt/ros/humble/share/nav2_bt_navigator/behavior_trees/; \
+    source /opt/ros/humble/setup.bash; \
+    colcon build --symlink-install"
 
 WORKDIR /root/ros_ws/src/serial
 RUN git checkout 2121a37eaa1aff8ca62badc0ac8f43b87169d706 && \

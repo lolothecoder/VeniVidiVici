@@ -60,16 +60,33 @@ def execute_rotation(angle, current_theta, angle_tolerance=0.07, max_angular_spe
 
     return goal_reached, angular_z
 
-def execute_translation(des_x, des_y, current_x, current_y, distance_tolerance, max_linear_speed, min_linear_speed):
+def execute_translation(des_x, des_y, current_x, current_y, current_yaw, distance_tolerance, max_linear_speed, min_linear_speed):
 
     current_distance_to_goal = np.sqrt((des_x - current_x) ** 2 + (des_y - current_y) ** 2)
+
+    vec1 = np.array([des_x - current_x, des_y - current_y])    
+    vec1 = vec1/np.linalg.norm(vec1)
+    vec2 = np.array([np.cos(current_yaw), np.sin(current_yaw)])
+    vec2 = vec2/np.linalg.norm(vec2)
 
     linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
     linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
 
-    target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(des_x - current_x) * linear_speed
+    target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(vec1[0]*vec2[0] + vec1[1]*vec2[1]) * linear_speed
 
     goal_reached = current_distance_to_goal <= distance_tolerance  
     linear_x     = target_x_speed    
 
     return goal_reached, linear_x
+
+def execute_translation_distance(distance, start_x, start_y, current_x, current_y, distance_tolerance, max_linear_speed, min_linear_speed):
+
+    current_distance_to_goal = np.abs(distance) - np.sqrt((start_x - current_x) ** 2 + (start_y - current_y) ** 2)
+
+    linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
+    linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
+
+    target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(distance) * linear_speed
+    goal_reached = current_distance_to_goal <= distance_tolerance
+        
+    return goal_reached, target_x_speed 

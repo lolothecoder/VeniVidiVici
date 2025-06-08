@@ -48,6 +48,8 @@ setup(
             'cam_process = veni_vidi_vici_bot_one.cam_process:main',
             'detect_duplo = veni_vidi_vici_bot_one.detect_duplo:main',
             'detect_duplo_3d = veni_vidi_vici_bot_one.detect_duplo_3d:main',
+            'arduino_teleop = veni_vidi_vici_bot_one.arduino_teleop:main',
+            'go_to_position = veni_vidi_vici_bot_one.go_to_position:main',
         ],
     },
 )

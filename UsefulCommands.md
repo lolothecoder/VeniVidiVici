@@ -29,7 +29,7 @@ launch robot:
 alaunch
 ros2 launch veni_vidi_vici_bot_one launch_robot.launch.py 
 
-ros2 launch veni_vidi_vici_bot_one VVV_launch_sim.launch.py activate_loc:=true activate_nav:=true activate_sm:=true
+ros2 launch veni_vidi_vici_bot_one VVV_launch_robot.launch.py activate_loc:=true activate_nav:=true activate_sm:=true
 
 list container:
 docker container ls
@@ -75,10 +75,13 @@ rviz2
 
 ros2 launch slam_toolbox online_async_launch.py params_file:=./src/veni_vidi_vici_bot_one/config/mapper_params_online_async.yaml use_sim_time:=false
 
-ros2 launch veni_vidi_vici_bot_one VVV_launch_sim.launch.py activate_sm:=true use_ros2_control:=true activate_nav:=true activate_loc:=true
+ros2 launch veni_vidi_vici_bot_one VVV_launch_robot.launch.py activate_sm:=true use_ros2_control:=true activate_nav:=true activate_loc:=true
 
 source /opt/ros/humble/setup.bash
 source ~/ros_ws/install/setup.bash
 export ROS_DOMAIN_ID=5
 
-ros2 launch veni_vidi_vici_bot_one VVV_launch_sim.launch.py activate_nav:=true activate_loc:=true activate_sm:=true use_ros2_control:=true 
+ros2 launch veni_vidi_vici_bot_one VVV_launch_robot.launch.py activate_nav:=true activate_loc:=true activate_sm:=true use_ros2_control:=true 
+
+ros2 topic pub /start_signal std_msgs/msg/Empty '{}'
+

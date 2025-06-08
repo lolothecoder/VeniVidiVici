@@ -1,6 +1,6 @@
 #ifndef DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
 #define DIFFDRIVE_ARDUINO_ARDUINO_COMMS_HPP
-
+# define M_PI           3.14159265358979323846  /* pi */
 // #include <cstring>
 #include <sstream>
 // #include <cstdlib>
@@ -146,6 +146,71 @@ public:
     send_msg(ss.str());
   }
 
+   void get_values(double &val_1, double &val_2)
+  {
+    std::string response = send_msg("i\r");
+
+    std::string delimiter = " ";
+    size_t del_pos = response.find(delimiter);
+    std::string token_1 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_2 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+
+    val_1 = 0.0;
+    val_2 = 0.0;
+
+    val_1 = std::stod(token_1.c_str())*(2*M_PI)/(60.0*60.0);
+    val_2 = std::stod(token_2.c_str())*(2*M_PI)/(60.0*60.0);
+  }
+
+  void get_imu (double &a_x, double &a_y, double &a_z, 
+                  double &g_x, double &g_y, double &g_z)
+  {
+    std::string response = send_msg("j\r");
+
+    std::string delimiter = " ";
+    size_t del_pos = response.find(delimiter);
+    std::string token_1 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_2 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_3 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_4 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_5 = response.substr(0, del_pos);
+    response = response.substr(del_pos + delimiter.length());
+
+    del_pos = response.find(delimiter);
+    std::string token_6 = response.substr(0, del_pos);
+
+    a_x = 0.0;
+    a_y = 0.0;
+    a_z = 0.0;
+    g_x = 0.0;
+    g_y = 0.0;
+    g_z = 0.0;
+
+    a_x = std::stod(token_1.c_str());
+    a_y = std::stod(token_2.c_str());
+    a_z = std::stod(token_3.c_str());
+    
+    g_x = std::stod(token_4.c_str());
+    g_y = std::stod(token_5.c_str());
+    g_z = std::stod(token_6.c_str());
+  }
 private:
     LibSerial::SerialPort serial_conn_;
     int timeout_ms_;

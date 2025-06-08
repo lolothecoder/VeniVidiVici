@@ -14,6 +14,7 @@
 
 #define MIN_PWM 25
 #define MAX_PWM 220
+#define MAX_SPEED 7000
 #endif 
 
 #ifdef GRABBER
