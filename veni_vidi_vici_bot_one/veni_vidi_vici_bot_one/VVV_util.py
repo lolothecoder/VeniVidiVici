@@ -45,7 +45,9 @@ def execute_rotation(angle, current_theta, angle_tolerance=0.07, max_angular_spe
 
     if control:
 
-        angular_speed = np.exp(np.abs(angle_diff)*2-1) * np.abs(max_angular_speed)
+        #angular_speed = np.exp(np.abs(angle_diff)*2-1) * np.abs(max_angular_speed)
+
+        angular_speed = np.arctan(angle_diff) * max_angular_speed
         angular_speed = max(min(angular_speed, max_angular_speed), min_angular_speed)
 
     else:
@@ -64,7 +66,9 @@ def execute_rotation_camera(current_x, angle_tolerance=0.07, max_angular_speed=0
 
     if control:
 
-        angular_speed = np.exp(np.abs(current_x)*2-1) * np.abs(max_angular_speed)
+        #angular_speed = np.exp(np.abs(current_x)*2-1) * np.abs(max_angular_speed)
+
+        angular_speed = np.arctan(current_x) * max_angular_speed
         angular_speed = max(min(angular_speed, max_angular_speed), min_angular_speed)
 
     else:
@@ -118,6 +122,30 @@ def execute_translation_lidar(curr_dist, distance_tolerance, max_linear_speed, m
     linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
 
     target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(curr_dist) * linear_speed
+    goal_reached = current_distance_to_goal <= distance_tolerance
+        
+    return goal_reached, target_x_speed 
+
+def execute_translation_laser(curr_dist, start_dist, length, distance_tolerance, max_linear_speed, min_linear_speed):
+
+    current_distance_to_goal = length - (start_dist - curr_dist)
+
+    linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
+    linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
+
+    target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else np.sign(current_distance_to_goal) * linear_speed
+    goal_reached = current_distance_to_goal <= distance_tolerance
+        
+    return goal_reached, target_x_speed 
+
+def execute_translation_camera(current_y, distance_tolerance, max_linear_speed, min_linear_speed):
+
+    current_distance_to_goal = np.abs(-0.9 - current_y)
+
+    linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
+    linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
+
+    target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else  linear_speed
     goal_reached = current_distance_to_goal <= distance_tolerance
         
     return goal_reached, target_x_speed 

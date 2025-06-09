@@ -17,7 +17,7 @@ void setServo(int i, int pos){
         }
     } else if (i == RAMP_ID){
          if (pos == RAMP_DOWN){
-            ramp.write(RAMP_DOWN);
+            ramp.write(30);
         } else if (pos == RAMP_UP_SHORTCUT){
             ramp.write(RAMP_UP);
         } else {

@@ -8,7 +8,7 @@ from sensor_msgs.msg     import Image
 from std_msgs.msg   import Float32
 from cv_bridge           import CvBridge
 
-BRIGHT_THR = 170          # 0–255 … raise/lower to taste
+BRIGHT_THR = 185          # 0–255 … raise/lower to taste
 
 # image resolution (px)
 IMG_W = 640
@@ -30,11 +30,16 @@ class DetectButton(Node):
 
         frame = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
 
+        lower_white = np.array([50,   50,   100], dtype=np.uint8)
+        upper_white = np.array([255, 255,  255], dtype=np.uint8)
+
         hsv  = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        v    = hsv[:, :, 2]                         # V channel only
-        mask = cv2.inRange(v, BRIGHT_THR, 255)      # bright ⇒ 255, else 0
+
+        # create mask for white
+        mask = cv2.inRange(hsv, lower_white, upper_white)
+
         h = mask.shape[0]              # image height in pixels
-        mask[h // 2 : , :] = 0         # rows midpoint … end  ← set to black
+        mask[h // 2 : , :] = 0
         # --------------------------------------------------------------------
 
         result = cv2.bitwise_and(frame, frame, mask=mask)
@@ -45,9 +50,6 @@ class DetectButton(Node):
             avg_x = xs.mean()              # arithmetic mean, in pixel units
             avg_x_norm = (avg_x / (IMG_W-1) * 2) -1
             self.button_pub.publish(Float32(data=float(avg_x_norm)))
-            # self.get_logger().info(f"avg_x = {avg_x_norm:.5f}")
-        # else:
-            # self.get_logger().info("No bright pixels in upper half.")
 
 def main(args=None):
     rclpy.init(args=args)

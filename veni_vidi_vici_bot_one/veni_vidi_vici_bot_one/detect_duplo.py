@@ -41,10 +41,10 @@ class DetectBall(Node):
 
         # 2. run YOLOv11 inference
         #    returns a list of Results; we take the first (and only) batch
-        results = self.yolo(frame, conf=0.85, stream=False)[0]
+        results = self.yolo(frame, conf=0.85, stream=False, verbose=False)[0]
 
         best_pt = Point()             # x,y normalized; z holds normalized size
-        best_conf = 0.0
+        best_size_norm = 0.0
 
         # 3. loop detections
         for box in results.boxes:
@@ -67,14 +67,15 @@ class DetectBall(Node):
             v_norm =  2 * (cy/(IMG_H-1)) - 1
             size_norm = (w*h)/(IMG_W*IMG_H)  # area fraction
 
-            if conf > best_conf:
+            if size_norm > best_size_norm and conf > 0.8:
                 best_conf = conf
                 best_pt.x = u_norm
                 best_pt.y = v_norm
                 best_pt.z = size_norm
+                best_size_norm = size_norm
 
         # 4. publish the best detection (if any)
-        if best_conf > 0:
+        if best_size_norm > 0:
             self.ball_pub.publish(best_pt)
             self.get_logger().debug(
                 f"Det ball: u={best_pt.x:.3f}, v={best_pt.y:.3f}, size={best_pt.z:.4f}, conf={best_conf:.2f}"

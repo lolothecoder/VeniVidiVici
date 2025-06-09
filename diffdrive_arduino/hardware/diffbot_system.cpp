@@ -336,13 +336,13 @@ hardware_interface::return_type diffdrive_arduino ::DiffDriveArduinoHardware::wr
   //wheel_l_.cmd = std::abs(wheel_l_.cmd);
   //wheel_r_.cmd = std::abs(wheel_r_.cmd);
   wheel_l_.cmd = wheel_l_.cmd*60.0*60.0/(2*M_PI);
-  wheel_r_.cmd = wheel_r_.cmd*60.0*60.0/(2*M_PI)*1.03;
+  wheel_r_.cmd = wheel_r_.cmd*60.0*60.0/(2*M_PI);
 
     //RCLCPP_INFO(
     //rclcpp::get_logger("DiffDriveArduinoHardware"), "Sent motor values: %f %f", wheel_l_.cmd, wheel_r_.cmd);
   //if (wheel_l_neg) wheel_l_.cmd = -wheel_l_.cmd;
   //if (wheel_r_neg) wheel_r_.cmd = -wheel_r_.cmd;
-  comms_.set_motor_values(wheel_l_.cmd, wheel_r_.cmd);
+  comms_.set_motor_values(wheel_l_.cmd*1.01, wheel_r_.cmd);
 
   comms_.set_servo_door_values(door_servo_.cmd);
 

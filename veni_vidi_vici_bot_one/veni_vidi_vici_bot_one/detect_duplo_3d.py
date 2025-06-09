@@ -97,7 +97,8 @@ class DetectBall3D(Node):
         P_map = P_map.ravel()
 
         # 6. publish point and marker
-        pt = Point(x=float(P_cam[0]), y=float(P_cam[1]), z=float(P_cam[2]))
+        dist_cam = np.linalg.norm(P_cam)
+        pt = Point(x=float(P_map[0]), y=float(P_map[1]), z=float(msg.z))
         self.pub.publish(pt)
 
         mk = Marker()

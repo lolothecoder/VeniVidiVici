@@ -42,19 +42,20 @@ class RobotState(Enum):
     S1_PRESS_BUTTON = 3
     S1_MOVE_TO_P11 = 4
     S1_EXIT_ROOM = 5
+    S1_TRANSIT_STATE = 6
 
-    SALL_SEARCH_FOR_DUPLO = 6
-    SALL_MOVE_TO_DUPLO = 7
-    SALL_MOVE_TO_CLOSEST_CORNER = 8
-    SALL_RETURN_TO_S = 9
-    SALL_DELOAD = 10
+    SALL_SEARCH_FOR_DUPLO = 7
+    SALL_MOVE_TO_DUPLO = 8
+    SALL_MOVE_TO_CLOSEST_CORNER = 9
+    SALL_RETURN_TO_S = 10
+    SALL_DELOAD = 11
 
-    S3_MOVE_TO_P30 = 11
-    S3_MOVE_TO_P31 = 12
-    S3_ALIGN_ROBOT = 13
-    S3_EXIT_RAMP   = 14
+    S3_MOVE_TO_P30 = 12
+    S3_MOVE_TO_P31 = 13
+    S3_ALIGN_ROBOT = 14
+    S3_EXIT_RAMP   = 15
 
-    S_STOP = 15
+    S_STOP = 16
 
 class StateMachineNode(Node):
 
@@ -86,7 +87,10 @@ class StateMachineNode(Node):
 
         #----- Hardcoded values from .csv -----
 
+        self.duplos_capacity = 8
+
         self.S_pose = {}
+        self.T_pose = {}
 
         self.button_ = {}
 
@@ -108,9 +112,9 @@ class StateMachineNode(Node):
         self.left_distance  = None
         self.right_distance  = None
 
-        self.list_of_visited_duplos = []
+        self.mission1_abandoned = False
 
-        self.block_record = False
+        self.lidar_dist_counter = 0.0
 
         #----- Mission 1 related state -----
 
@@ -119,49 +123,23 @@ class StateMachineNode(Node):
         self.nav2_to_duplo        = False
 
         self.button_normalized_coord = None
-
+        self.align_wall = False
 
         self.wait_for_goal = False
         self.manual_recovery = False
-        self.adjust_position = False
         self.adjust_orientation = False
         self.previous_linear_x_mn = 0.0
 
-        self.number_of_recoveries = 0
-
         self.prepare_press_button = True
         self.button_attempts = 0.0
-        self.prepare_enter = True
-        self.align_enter = False
-        self.go_through_door = False
 
         self.S1_door_open = False
-        self.num_press_attempt = 0.0
-        self.prepare_press_button = True
-        self.des_x_button = None
-        self.des_y_button = None
-        self.des_theta_button = None
-        self.door_thr_button = None
         self.align_button = False
         self.approach_button = False
         self.finished_action_time = None
         self.wait_for_door_to_open = False
         self.verify_door_is_open = False
         self.go_back_button = False
-        self.des_x_ret = None
-        self.des_y_ret = None
-        self.match_door_orientation = False
-        self.wait_scan_counter = 0.0
-
-        self.prepared_exit = False
-        self.prepare_x = None
-        self.prepare_y = None
-        self.prepare_theta = None
-        self.align_exit = False
-        self.match_exit_orientation = False
-        self.exit_x = None
-        self.exit_y = None
-        self.exit_theta = None
 
         self.turn_left = False
         self.turn_right = False
@@ -172,32 +150,43 @@ class StateMachineNode(Node):
         self.estimating_duplo_position = False
         self.duplo_found = False
         self.next_duplo = {}
-        self._best_dist = 10000
+        self._best_area = -1.0
 
         self.current_duplo_x = None
         self.current_duplo_y = None
         self.current_duplo_theta = None
-        self.reached_duplo = False
-
-        self.choose_corner = True
-        self.corner_x = None
-        self.corner_y = None
-        self.corner_theta = None
-        self.goal_theta = None
-        self.corner_idx = None
-        self.align_corner = False
-        self.go_straight_to_corner = False
-        self.nav2_to_corner = False
+        self.nearest_duplo_x = None
+        self.nearest_duplo_y = None
+        self.move_to_duplo_more = False
+        self.start_distance = None
+        self.current_duplo_x_in_frame = None
+        self.current_duplo_y_in_frame = None
 
         self.mission1_available_corners = None
         self.mission2_available_corners = None
         self.mission3_available_corners = None
-        self.match_corner_orientation = False
 
         self.number_of_duplos_collected = 0.0
-        self.duplos_capacity = 5
 
-        self.start_deload = True
+        self.prepare_exit = True
+        self.exit_protection = False
+        self.rotate_exit = False
+        self.approach_exit = False
+        self.exit_door = False
+
+        self.prepare_deload = True
+        self.deload_move = False
+
+        self.prepare_corner = True
+        self.corner_x = None
+        self.corner_y = None 
+        self.corner_theta = None 
+        self.corner_idx = None
+        self.corner_goal_theta = None
+        self.go_straight_to_corner = False
+        self.nav2_to_corner = False
+        self.align_corner = False
+        self.match_corner_orientation = False
 
         #----- Temporary -----
 
@@ -249,7 +238,8 @@ class StateMachineNode(Node):
         self.odom_sub = self.create_subscription(Odometry,  '/diff_cont/odom', self.odom_callback, 1, callback_group=self._default_callback_group)
         self.scan_sub = self.create_subscription(LaserScan, '/scan', self.scan_callback, 1          , callback_group=self._default_callback_group)
 
-        #self.yolov11_sub = self.create_subscription(Point,  '/detected_ball_3d_map', self.yolov11_callback, 10, callback_group=self._default_callback_group)
+        self.yolov11_sub = self.create_subscription(Point,  '/detected_duplo_3d', self.yolov11_callback, 10, callback_group=self._default_callback_group)
+        self.yolov11_in_frame_sub = self.create_subscription(Point,  '/detected_duplo', self.yolov11_in_frame_callback, 10, callback_group=self._default_callback_group)
         self.button_pose_sub = self.create_subscription(Float32, '/button_pose', self.button_pose_callback, 1, callback_group=self._default_callback_group )
 
         self.stop_sub = self.create_subscription(Empty,     '/stop_signal', self.stop_callback, 1   , callback_group=self._priority_callback_group)
@@ -321,6 +311,38 @@ class StateMachineNode(Node):
     #----- STATE MACHINE RELATED FUNCTIONS -----
 
     def _init_state_machine(self):
+
+        #----- Load Transient pose -----
+
+        try:
+            s_pose_csv_path = os.path.join(
+                get_package_share_directory('veni_vidi_vici_bot_one'),
+                'general',
+                'transient_pose.csv'
+            )     
+
+            with open(s_pose_csv_path, mode='r') as csv_file:
+
+                reader = csv.DictReader(csv_file)
+                row = next(reader)  # Only one row expected
+
+                t_x = float(row['x'])
+                t_y = float(row['y'])
+                t_theta = float(row['theta'])
+
+            self.get_logger().info("SUCCESFULLY LOADED TRANSIENT POSE") 
+
+        except Exception as e:   
+
+            self.get_logger().info("FAILED TO LOAD TRANSIENT POSE")  
+
+            t_x = 4.5
+            t_y = 4.5
+            t_theta = -np.pi/4  
+
+        self.T_pose['x'] = t_x
+        self.T_pose['y'] = t_y
+        self.T_pose['theta'] = t_theta
 
         #----- Load S pose -----
 
@@ -509,31 +531,28 @@ class StateMachineNode(Node):
 
     def _mission1_reset_params(self):
 
+        self.align_with_duplo = False
+        self.go_straight_to_duplo = False
+        self.nav2_to_duplo        = False
+
+        self.button_normalized_coord = None
+        self.align_wall = False
+
         self.wait_for_goal = False
         self.manual_recovery = False
+        self.adjust_orientation = False
         self.previous_linear_x_mn = 0.0
 
-        self.number_of_recoveries = 0
+        self.prepare_press_button = True
+        self.button_attempts = 0.0
 
-        self.mission1_abandoned = False
         self.S1_door_open = False
-        self.num_press_attempt = 0.0
-        self.align_button = True
+        self.align_button = False
         self.approach_button = False
+        self.finished_action_time = None
+        self.wait_for_door_to_open = False
         self.verify_door_is_open = False
         self.go_back_button = False
-        self.wait_scan_counter = 0.0
-        self.prepared_exit = False
-        self.prepare_x = None
-        self.prepare_y = None
-        self.prepare_theta = None
-        self.align_exit = False
-        self.match_exit_orientation = False
-        self.exit_x = None
-        self.exit_y = None
-        self.exit_theta = None
-
-        self.adjust_orientation = False
 
         self.turn_left = False
         self.turn_right = False
@@ -544,18 +563,29 @@ class StateMachineNode(Node):
         self.estimating_duplo_position = False
         self.duplo_found = False
         self.next_duplo = {}
+        self._best_area = -1.0
 
         self.current_duplo_x = None
         self.current_duplo_y = None
         self.current_duplo_theta = None
-        self.reached_duplo = False
+        self.nearest_duplo_x = None
+        self.nearest_duplo_y = None
+        self.move_to_duplo_more = False
+        self.start_distance = None
+        self.current_duplo_x_in_frame = None
+        self.current_duplo_y_in_frame = None
 
-        self.corner_x = None
-        self.corner_y = None
-        self.corner_theta = None
-        self.corner_idx = None
-        self.corner_reached = False
-        self.match_corner_orientation = False
+        self.mission1_available_corners = [self.list_of_corners_Z1[2], self.list_of_corners_Z1[3], self.list_of_corners_Z1[4]]
+        self.number_of_duplos_collected = 0.0
+
+        self.prepare_exit = True
+        self.exit_protection = False
+        self.rotate_exit = False
+        self.approach_exit = False
+        self.exit_door = False
+
+        self.prepare_deload = True
+        self.deload_move = False
     
     def disable_costmaps(self):
 
@@ -592,11 +622,41 @@ class StateMachineNode(Node):
 
             next_state = self.execute_S1_PRESS_BUTTON()
 
+        elif self.state == RobotState.S1_TRANSIT_STATE:
+
+            next_state = self.execute_S1_TRANSIT_STATE()
+
+        elif self.state == RobotState.S1_MOVE_TO_P11:
+
+            next_state = self.execute_S1_MOVE_TO_P11()
+
+        elif self.state == RobotState.SALL_SEARCH_FOR_DUPLO:
+
+            next_state = self.execute_SALL_SEARCH_FOR_DUPLO()
+
+        elif self.state == RobotState.SALL_MOVE_TO_DUPLO:
+
+            next_state = self.execute_SALL_MOVE_TO_DUPLO()
+
+        elif self.state == RobotState.SALL_MOVE_TO_CLOSEST_CORNER:
+
+            next_state = self.execute_SALL_MOVE_TO_CLOSEST_CORNER()
+
+        elif self.state == RobotState.S1_EXIT_ROOM:
+
+            next_state = self.execute_S1_EXIT_ROOM()
+
+        elif self.state == RobotState.SALL_RETURN_TO_S:
+
+            next_state = self.execute_SALL_RETURN_TO_S()
+
+        elif self.state == RobotState.SALL_DELOAD:
+
+            next_state = self.execute_SALL_DELOAD()
+
         else:
 
             next_state = RobotState.S_STOP
-
-        #----- ADD NEW STATES -----
 
         #----- Update elapsed time -----
 
@@ -606,6 +666,24 @@ class StateMachineNode(Node):
             elapsed_time = current_time - self.start_time
 
             self.elapsed_time = elapsed_time.nanoseconds * 1e-9
+
+        #----- Check timeout -----
+
+        if not self.running_timeout1 and self.current_mission == 1 and self.elapsed_time > self.list_of_timeouts[0]:
+            
+            self.running_timeout1 = True
+
+            self.get_logger().info("TIMEOUT 1 REACHED") 
+
+            if next_state in [RobotState.S1_MOVE_TO_P10, RobotState.S1_PRESS_BUTTON, RobotState.S1_MOVE_TO_P11]:
+
+                next_state = RobotState.S1_TRANSIT_STATE
+                self._mission1_reset_params()
+
+            elif next_state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.SALL_MOVE_TO_DUPLO, RobotState.SALL_MOVE_TO_CLOSEST_CORNER]:
+
+                next_state = RobotState.S1_EXIT_ROOM       
+                self._mission1_reset_params()
 
         self.state = next_state
 
@@ -656,42 +734,36 @@ class StateMachineNode(Node):
 
         self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
 
-    # def yolov11_callback(self, msg: Point):
+    def yolov11_in_frame_callback(self, msg: Point):
 
-    #     if self.state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.SALL_MOVE_TO_CLOSEST_CORNER, RobotState.S1_MOVE_TO_P11] and not self.block_record:  #, RobotState.S1_MOVE_TO_P11
+            dx, dy = msg.x, msg.y
 
-    #         #----- If this detection is closer than any before and duplo not taken already, remember it
+            if dx is not None:
 
-    #         dx, dy = msg.x, msg.y
+                self.current_duplo_x_in_frame, self.current_duplo_y_in_frame = dx, dy
 
-    #         not_already_visited = True
+    def yolov11_callback(self, msg: Point):
 
-    #         for duplo in self.list_of_visited_duplos:
+        if self.state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.S1_MOVE_TO_P11, RobotState.SALL_MOVE_TO_CLOSEST_CORNER]:
 
-    #             dist_duplo = math.hypot(dx - duplo['x'], dy - duplo['y'])
-    #             if dist_duplo < 0.5: 
-                    
-    #                 not_already_visited = False
-    #                 break
-            
-    #         if not_already_visited:
+            dx, dy = msg.x, msg.y
+            area = msg.z
 
-    #             rx = self.trans.transform.translation.x
-    #             ry = self.trans.transform.translation.y
+            if dx is not None:
 
-    #             dist = math.hypot(dx - rx, dy - ry)
-            
-    #             if dist < self._best_dist:
+                if not self.is_in_carpet(dx, dy):
 
-    #                 self._best_dist      = dist
-    #                 self.nearest_duplo_x = dx
-    #                 self.nearest_duplo_y = dy
+                    if area > self._best_area:
 
-    #     else:
+                        self._best_area = area
+                        self.nearest_duplo_x = dx
+                        self.nearest_duplo_y = dy
 
-    #             self._best_dist      = 10000
-    #             self.nearest_duplo_x = None
-    #             self.nearest_duplo_y = None           
+        else:
+
+            self._best_area = -1.0
+            self.nearest_duplo_x = None
+            self.nearest_duplo_y = None
 
     def button_pose_callback(self, msg):
 

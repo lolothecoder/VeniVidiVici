@@ -315,8 +315,8 @@ def generate_launch_description():
         delayed_sm_node,
 
         delayed_image_node,
-        #delayed_duplo_node,
-        #delayed_duplo_pos_node,
+        delayed_duplo_node,
+        delayed_duplo_pos_node,
         delayed_button_pos_node,
 
     ])

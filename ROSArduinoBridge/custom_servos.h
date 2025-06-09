@@ -9,7 +9,7 @@
 
 #define RAMP_DOWN 0
 #define RAMP_UP_SHORTCUT 1
-#define RAMP_UP 20
+#define RAMP_UP 45
 
 #define DOOR_ID 0
 #define  RAMP_ID 1

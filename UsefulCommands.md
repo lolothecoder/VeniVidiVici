@@ -43,6 +43,7 @@ acompile ROSArduinoBridge/ && aupload ROSArduinoBridge/
 
 Controlling motors through pyserial
 pyserial-miniterm -e /dev/ttyACM0 57600
+type: f for battery
 
 create new bash
 anewbash
