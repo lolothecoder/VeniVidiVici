@@ -158,8 +158,8 @@ controller_server:
       batch_size: 1000
 
       # Velocity limits (corrected min_angular_vel sign)
-      max_linear_vel: 0.3
-      min_linear_vel: -0.3
+      max_linear_vel: 0.5
+      min_linear_vel: -0.5
       max_angular_vel: 0.3
       min_angular_vel: -0.3
 
@@ -389,8 +389,8 @@ velocity_smoother:
     smoothing_frequency: 20.0
     scale_velocities: False
     feedback: "OPEN_LOOP"
-    max_velocity: [0.30, 0.0, 0.8]
-    min_velocity: [-0.30, 0.0, -1.0]
+    max_velocity: [0.50, 0.0, 0.8]
+    min_velocity: [-0.50, 0.0, -1.0]
     max_accel: [2.5, 0.0, 2.0]
     max_decel: [-2.5, 0.0, -2.0]
     odom_topic: "odom"

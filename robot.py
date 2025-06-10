@@ -21,7 +21,7 @@ STOP_SPEED      = 0
 ARDUINO_BOOT_DELAY = 2.0  # seconds
 
 # How long to wait (in seconds) for a keypress before sending stop
-IDLE_TIMEOUT = 5
+IDLE_TIMEOUT = 0.1
 
 # Interval (in seconds) to resend "h 0 1" to keep door open (must be < 2s)
 DOOR_KEEPALIVE_INTERVAL = 1.0
