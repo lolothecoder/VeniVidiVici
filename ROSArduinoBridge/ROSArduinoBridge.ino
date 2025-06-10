@@ -16,6 +16,7 @@
    #define BATTERY
    #define CUSTOM_SERVOS
    //Adafruit_MPU6050 mpu;
+   #define SPIN_BACK  2000
 #endif
 
 #undef USE_SERVOS     // Disable use of PWM servos
@@ -70,6 +71,15 @@ float right_speed = 0;
 float voltage_battery = 0;
 float a_x = 0; float a_y = 0; float a_z = 0;
 float g_x = 0; float g_y = 0; float g_z = 0;
+
+const int encoderPinA = A0;
+unsigned long switchCount = 0;
+bool lastA = LOW;
+unsigned long lastReport = 0;
+bool grabber = false;
+bool stuck = false;
+unsigned long stuckTime = 0;
+unsigned long checkEncoder = 0;
 
 void battery_level(){
         float value = analogRead(BATTERY_PIN);
@@ -278,6 +288,8 @@ void setup() {
   pinMode(GRABBER_PWM, OUTPUT);
 
   pinMode(BATTERY_PIN, INPUT);
+  pinMode(encoderPinA, INPUT_PULLUP);
+  lastA = digitalRead(encoderPinA);
   //mpu.setAccelerometerRange(MPU6050_RANGE_4_G);
   //mpu.setGyroRange(MPU6050_RANGE_250_DEG);
   //mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
