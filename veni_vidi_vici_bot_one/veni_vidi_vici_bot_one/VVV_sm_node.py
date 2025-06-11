@@ -56,6 +56,7 @@ class RobotState(Enum):
     S3_EXIT_RAMP   = 15
 
     S_STOP = 16
+    S1_SWEEP = 17
 
 class StateMachineNode(Node):
 
@@ -84,10 +85,11 @@ class StateMachineNode(Node):
         self.started_moving = False
 
         self.running_timeout1 = False
-
+        self.running_timeout2 = False
+        
         #----- Hardcoded values from .csv -----
 
-        self.duplos_capacity = 8
+        self.duplos_capacity = 20
 
         self.S_pose = {}
         self.T_pose = {}
@@ -117,6 +119,22 @@ class StateMachineNode(Node):
         self.lidar_dist_counter = 0.0
 
         #----- Mission 1 related state -----
+
+        self.list_of_mission1_hardcoded_points = [
+
+            [11.3, 3.0, -np.pi/2],
+            [11.3, 3.5, -np.pi/2],
+            [11.3, 4.2,  np.pi],
+            [10.5, 4.2,  np.pi],
+            [9.7,  4,2,  -np.pi/2],
+            [9.7,  3.5,  -np.pi/2],
+            [9.7,  3.0,  0.0],
+            [10.5, 3.0, 0.0],
+            [11.0, 3.5, -np.pi/2],
+            [10.5, 4.0, np.pi],
+            [10.0, 3.5, -np.pi/2]
+        ]
+        self.first_time_sweep = True
 
         self.align_with_duplo = False
         self.go_straight_to_duplo = False
@@ -161,6 +179,10 @@ class StateMachineNode(Node):
         self.start_distance = None
         self.current_duplo_x_in_frame = None
         self.current_duplo_y_in_frame = None
+        self.distance_to_duplo = None
+
+        self.align_manual = False
+        self.length = None
 
         self.mission1_available_corners = None
         self.mission2_available_corners = None
@@ -187,6 +209,22 @@ class StateMachineNode(Node):
         self.nav2_to_corner = False
         self.align_corner = False
         self.match_corner_orientation = False
+
+        #----- Mission 2 setpoints -----
+
+        self.list_of_mission2_hardcoded_points = [
+
+            [11.5, 4.2,  np.pi],
+            [10.5, 4.2,  np.pi],
+            [9.7,  4.2, -np.pi/2],
+            [9.7,  3.5, -np.pi/2],
+            [9.7,  3.0,  0.0],
+            [10.5, 3.0,  0.0],
+            [11.0, 3.5, -np.pi/2],
+            [10.5, 4.0,  np.pi],
+            [10.0, 3.5, -np.pi/2]
+        ]
+        self.first_time_sweep2 = True        
 
         #----- Temporary -----
 
@@ -433,7 +471,9 @@ class StateMachineNode(Node):
 
             self.get_logger().info("SUCCESFULLY LOADED ZONE 1 POINTS") 
 
-            self.mission1_available_corners = [self.list_of_corners_Z1[2], self.list_of_corners_Z1[3], self.list_of_corners_Z1[4]]
+            self.mission1_available_corners = self.list_of_corners_Z1.copy()
+            del self.mission1_available_corners[0]
+            del self.mission1_available_corners[0]
 
         except Exception as e:   
 
@@ -464,7 +504,8 @@ class StateMachineNode(Node):
 
             self.get_logger().info("SUCCESFULLY LOADED ZONE 2 POINTS") 
 
-            self.mission2_available_corners = [self.list_of_corners_Z2[2], self.list_of_corners_Z2[3], self.list_of_corners_Z2[4]]
+            self.mission2_available_corners = self.list_of_corners_Z2.copy()
+            del self.mission2_available_corners[0]
 
         except Exception as e:   
 
@@ -527,9 +568,9 @@ class StateMachineNode(Node):
 
             self.get_logger().info("FAILED TO LOAD BUTTON PRESS POSE") 
 
-        return len(self.list_of_timeouts) == 3 and len(self.list_of_corners_Z1) == 5 and len(self.list_of_corners_Z2) == 5 and len(self.list_of_corners_Z3) == 5
+        return len(self.list_of_timeouts) == 3 and len(self.list_of_corners_Z1) == 8 and len(self.list_of_corners_Z2) == 8 and len(self.list_of_corners_Z3) == 5
 
-    def _mission1_reset_params(self):
+    def _mission_reset_params(self):
 
         self.align_with_duplo = False
         self.go_straight_to_duplo = False
@@ -576,7 +617,11 @@ class StateMachineNode(Node):
         self.current_duplo_y_in_frame = None
 
         self.mission1_available_corners = [self.list_of_corners_Z1[2], self.list_of_corners_Z1[3], self.list_of_corners_Z1[4]]
+        self.mission2_available_corners = self.list_of_corners_Z2.copy()
         self.number_of_duplos_collected = 0.0
+
+        self.align_manual = False
+        self.length = None
 
         self.prepare_exit = True
         self.exit_protection = False
@@ -654,6 +699,14 @@ class StateMachineNode(Node):
 
             next_state = self.execute_SALL_DELOAD()
 
+        elif self.state == RobotState.S1_TRANSIT_STATE:
+
+            next_state = self.execute_S1_TRANSIT_STATE()
+
+        elif self.state == RobotState.S1_SWEEP:
+
+            next_state = self.execute_S1_SWEEP()
+            
         else:
 
             next_state = RobotState.S_STOP
@@ -683,7 +736,18 @@ class StateMachineNode(Node):
             elif next_state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.SALL_MOVE_TO_DUPLO, RobotState.SALL_MOVE_TO_CLOSEST_CORNER]:
 
                 next_state = RobotState.S1_EXIT_ROOM       
-                self._mission1_reset_params()
+                self._mission_reset_params()
+
+        #----- 2nd timeout check -----
+
+        if not self.running_timeout2 and self.elapsed_time > self.list_of_timeouts[1]:
+
+            self.running_timeout2 = True
+
+            self.get_logger().info("TIMEOUT 2 REACHED")     
+
+            next_state = RobotState.SALL_RETURN_TO_S   
+            self._mission_reset_params()
 
         self.state = next_state
 
@@ -722,6 +786,9 @@ class StateMachineNode(Node):
         right_index = int((-1.57 - msg.angle_min) / msg.angle_increment)
         self.right_distance = msg.ranges[right_index]
 
+        back_index = int((3.14 - msg.angle_min) / msg.angle_increment)
+        self.back_distance = msg.ranges[back_index]
+
     def start_callback(self, msg):
 
         self.start = True
@@ -738,20 +805,18 @@ class StateMachineNode(Node):
 
             dx, dy = msg.x, msg.y
 
-            if dx is not None:
-
-                self.current_duplo_x_in_frame, self.current_duplo_y_in_frame = dx, dy
+            self.current_duplo_x_in_frame, self.current_duplo_y_in_frame = dx, dy
 
     def yolov11_callback(self, msg: Point):
 
-        if self.state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.S1_MOVE_TO_P11, RobotState.SALL_MOVE_TO_CLOSEST_CORNER]:
+        if self.state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.S1_MOVE_TO_P11, RobotState.SALL_MOVE_TO_CLOSEST_CORNER, RobotState.SALL_MOVE_TO_DUPLO]:
 
             dx, dy = msg.x, msg.y
             area = msg.z
 
             if dx is not None:
 
-                if not self.is_in_carpet(dx, dy):
+                if not self.is_in_vicinity_carpet(dx, dy):
 
                     if area > self._best_area:
 

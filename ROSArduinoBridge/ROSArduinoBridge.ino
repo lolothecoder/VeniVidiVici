@@ -80,6 +80,7 @@ bool grabber = false;
 bool stuck = false;
 unsigned long stuckTime = 0;
 unsigned long checkEncoder = 0;
+bool set_time = false;
 
 void battery_level(){
         float value = analogRead(BATTERY_PIN);
@@ -203,20 +204,37 @@ int runCommand() {
       setMotorSpeeds(arg1, arg2);
       left_speed  = arg1;
       right_speed = arg2;
+      //if (stuck){
+      //  setGrabberSpeed(80);
+      //}
       Serial.println("OK");
       break;
     case GRABBER_RAW_PWM:
       lastGrabberCommand = millis();
-      //collector_activated = true;
-     // if (arg1 == 0) {
-    // user explicitly turned it off:
-    //collector_activated  = false;
-    //currentlyReversing   = false;
-    //reverseUntil         = 0;
-  //} else {
-  //  collector_activated = true;
-  //}
-  setGrabberSpeed(arg1);
+      if(arg1!= 0){
+        collector_activated = true;
+        checkEncoder = millis();
+      }
+      if(stuck){
+        if(millis() - stuckTime > SPIN_BACK){
+          stuck = false;
+          collector_activated = false;
+          //Serial.println("UNSTUCK");
+        }
+        setGrabberSpeed(-arg1);
+      }
+      else{
+        setGrabberSpeed(arg1);
+      }
+
+      if(arg1 == 0) {
+        collector_activated = false;
+        currentlyReversing  = false;
+        reverseUntil        = 0;
+        grabber = false;
+        stuck = false;
+        set_time = false;
+      }
       Serial.println("OK");
       break;
     case BATTERY_LEVEL:
@@ -381,7 +399,7 @@ void loop() {
     nextPID += PID_INTERVAL;
   }
 
-
+/*
   // 6) Stuck‐detection: poll A0 for edges
   if(collector_activated){
     unsigned long now = millis();
@@ -421,7 +439,7 @@ void loop() {
   }
   
   }
-
+*/
       // 3) Auto‐stop for drive motors
   if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL) {
     setMotorSpeeds(0, 0);
@@ -436,6 +454,9 @@ void loop() {
     collector_activated = false;
     currentlyReversing  = false;
     reverseUntil        = 0;
+    grabber = false;
+    stuck = false;
+    set_time = false;
   }
 
   // 5) Auto‐stop for servos
@@ -450,6 +471,34 @@ void loop() {
   //g_x = g.gyro.x;
   //g_y = g.gyro.y;
   //g_z = g.gyro.z;
+
+  if (millis() - checkEncoder > 100){
+    if(grabber != true && collector_activated == true){
+      //Serial.print("CHECKING");
+      grabber = true;
+    }
+  }
+
+  bool nowA = digitalRead(encoderPinA);
+  if (nowA != lastA) {
+    switchCount++;
+    lastA = nowA;
+  }
+  // report every second
+  if (millis() - lastReport >= 1000) {
+    //Serial.print("Edges in last 1 s: ");
+    //Serial.println(switchCount);
+    if (switchCount < 200 && grabber) {
+      if(stuck != true){
+        //Serial.print("STUCK");
+        stuck = true;
+        stuckTime = millis();
+      }
+    }
+    switchCount = 0;
+    lastReport += 1000;
+  }
+
 #endif
 #ifdef USE_SERVOS
   for (int i = 0; i < N_SERVOS; i++) {

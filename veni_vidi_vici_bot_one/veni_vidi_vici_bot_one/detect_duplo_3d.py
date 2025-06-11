@@ -27,8 +27,10 @@ K = np.array([[1133.10504192, 0, 628.21074810],
 K_inv = np.linalg.inv(K)
 
 IMG_W, IMG_H = 640, 480                                 # pixels
-CENTER_THRESH_X = 0.99                                     # normalised pixels 
-CENTER_THRESH_Y = 0.99                                     # normalised pixels
+CENTER_THRESH_X_POS = 0.4                               # normalised pixels 
+CENTER_THRESH_X_NEG = -0.4    
+CENTER_THRESH_Y_POS = 0.5                                     # normalised pixels
+CENTER_THRESH_Y_NEG = -0.5
 
 # ────────── ROS2 node ───────────────────────────────────────────────────
 class DetectBall3D(Node):
@@ -42,15 +44,15 @@ class DetectBall3D(Node):
 
         self.create_subscription(Point, '/detected_duplo', self.cb, 10)
         self.pub  = self.create_publisher(Point,  '/detected_duplo_3d', 10)
-        self.mpub = self.create_publisher(Marker, '/ball_3d_marker', 10)
+        self.mpub = self.create_publisher(Marker, '/duplo_3d_marker', 10)
 
         self.ball_radius = 0.033
         self.get_logger().info('Node initialised (TF version).')
 
     # ------------------------------------------------------------------
     def cb(self, msg: Point):
-        if abs(msg.x) > CENTER_THRESH_X or abs(msg.y) > CENTER_THRESH_Y:
-            return
+        # if (msg.x > CENTER_THRESH_X_POS or msg.x < CENTER_THRESH_X_NEG) or (msg.y > CENTER_THRESH_Y_POS or msg.y < CENTER_THRESH_Y_NEG):
+        #     return
 
         # 1. normalised (-1…+1) → pixel (0…W-1 / 0…H-1)
         u_px = (msg.x + 1.0) * 0.5 * (IMG_W - 1)
@@ -104,9 +106,10 @@ class DetectBall3D(Node):
         mk = Marker()
         mk.header.frame_id = 'camera_link_optical'
         mk.type, mk.action = mk.SPHERE, mk.ADD
+        pt = Point(x=float(P_map[0]), y=float(P_map[1]), z=float(0.0))
         mk.pose.position   = pt
-        mk.scale.x = mk.scale.y = mk.scale.z = self.ball_radius * 2
-        mk.color.r, mk.color.g, mk.color.b, mk.color.a = 1.0, 0.0, 0.0, 1.0
+        mk.scale.x = mk.scale.y = mk.scale.z = self.ball_radius * 10
+        mk.color.r, mk.color.g, mk.color.b, mk.color.a = 0.0, 1.0, 0.0, 1.0
         self.mpub.publish(mk)
 
         # 7. debug prints

@@ -50,7 +50,7 @@ class DetectBall(Node):
         for box in results.boxes:
             cls   = int(box.cls[0])   # class index
             conf  = float(box.conf[0])
-            if cls != 0:              # assume class 0 = tennis‐ball
+            if cls != 0:              
                 continue
 
             # bounding‐box coords
@@ -66,6 +66,9 @@ class DetectBall(Node):
             u_norm =  2 * (cx/(IMG_W-1)) - 1
             v_norm =  2 * (cy/(IMG_H-1)) - 1
             size_norm = (w*h)/(IMG_W*IMG_H)  # area fraction
+
+            # if size_norm > 0.2:
+            #     continue
 
             if size_norm > best_size_norm and conf > 0.8:
                 best_conf = conf

@@ -199,8 +199,8 @@ def main():
 
             elif ch in ("k", ";"):
                 # Activate grabber: send immediately and start keepalive
-                send_grabber_command(ser, 200)
-                print("→ grabber on (sent 'g 150')")
+                send_grabber_command(ser, -80)
+                print("→ grabber on (sent 'g -80')")
                 grabber_active = True
                 last_grabber_time = current_time
 
@@ -253,7 +253,7 @@ def main():
 
             # ─── GRABBER KEEPALIVE LOGIC ─────────────────────────────────────
             if grabber_active and (current_time - last_grabber_time >= GRABBER_KEEPALIVE_INTERVAL):
-                send_grabber_command(ser, 200)
+                send_grabber_command(ser, -80)
                 last_grabber_time = current_time
 
             # ─── RAMP KEEPALIVE LOGIC ───────────────────────────────────────

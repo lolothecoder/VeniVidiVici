@@ -19,6 +19,7 @@ from nav2_simple_commander.robot_navigator import BasicNavigator, TaskResult
 
 import numpy as np
 import math
+import random
 
 from veni_vidi_vici_bot_one.VVV_util import *
 from veni_vidi_vici_bot_one.VVV_sm_node import RobotState, StateMachineNode
@@ -58,6 +59,7 @@ def _detect_next_duplo(self):
 
         if self.nearest_duplo_x > limit_x_min and self.nearest_duplo_x < limit_x_max and self.nearest_duplo_y > limit_y_min and self.nearest_duplo_y < limit_y_max:
 
+            self.get_logger().info("FOUND A FEASIBLE DUPLO")
             self.next_duplo['x'] = self.nearest_duplo_x
             self.next_duplo['y'] = self.nearest_duplo_y
 
@@ -115,6 +117,34 @@ def is_in_carpet(self, dx, dy):
 
     return dx >= 4.0 and dx <= 6.0 and dy >= -3 and dy <= 0
 
+def is_in_vicinity_carpet(self, dx, dy):
+
+    return dx >= 4.0 and dx <= 6.4 and dy >= -3 and dy <= 0.4
+
+def close_to_wall(self):
+
+    if self.front_distance <= 0.6: #0.3:        
+        self.front_close = True
+    else:
+        self.front_close = False
+
+    if self.back_distance <= 0.6:        
+        self.back_close = True
+    else:
+        self.back_close = False 
+
+    if self.left_distance <= 0.6: #0.3:      
+        self.left_close = True
+    else:
+        self.left_close = False 
+
+    if self.right_distance <= 0.6: #0.3:     
+        self.right_close = True
+    else:
+        self.right_close = False 
+
+    return self.front_close or self.back_close or self.left_close or self.right_close
+
 #----- Execute states of the SM methods -----
 
 def execute_S0_BOOT(self):
@@ -155,6 +185,11 @@ def execute_SALL_READY(self):
             self.current_mission = 1
             self.get_logger().info("Transition to: S1_MOVE_TO_P10")
             next_state = RobotState.S1_MOVE_TO_P10 
+
+            #self.current_mission = 2
+            #next_state = RobotState.SALL_SEARCH_FOR_DUPLO
+            #self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+
             self.previous_state = RobotState.SALL_READY
 
         else:
@@ -173,6 +208,7 @@ def execute_SALL_READY(self):
                 self.current_mission = 1
                 self.get_logger().info("Transition to: S1_MOVE_TO_P10")
                 next_state = RobotState.S1_MOVE_TO_P10 
+
                 self.previous_state = RobotState.SALL_READY
 
                 #----- Reinitialize the corners of the first mission -----
@@ -223,7 +259,7 @@ def execute_S1_MOVE_TO_P10(self):
 
     #----- Turn on collector to cleanout duplos in the way -----
 
-    self._publish_collector_servo_cmd(collector_command=[150.0])
+    self._publish_collector_servo_cmd(collector_command=[-80.0])
 
     #-----
 
@@ -323,6 +359,7 @@ def execute_S1_PRESS_BUTTON(self):
     elif self.align_wall:
 
         rotation_goal_reached, angular_z_mn = execute_rotation(self.theta_prepare, current_yaw, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
+        self._publish_collector_servo_cmd(collector_command=[80.0])
 
         if not rotation_goal_reached:
 
@@ -338,7 +375,7 @@ def execute_S1_PRESS_BUTTON(self):
     
     elif self.align_button:
 
-        rotation_goal_reached, angular_z_mn = execute_rotation_camera(current_x = self.button_normalized_coord, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
+        rotation_goal_reached, angular_z_mn = execute_rotation_camera(current_x = self.button_normalized_coord, angle_tolerance=0.1, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
 
         if not rotation_goal_reached:
 
@@ -357,6 +394,7 @@ def execute_S1_PRESS_BUTTON(self):
     elif self.approach_button:
 
         trans_goal_reached, linear_x_mn = execute_translation_lidar(self.front_distance, distance_tolerance=0.05, max_linear_speed=0.3, min_linear_speed=0.125)
+        self._publish_collector_servo_cmd(collector_command=[-80.0])
 
         if not trans_goal_reached:
 
@@ -394,7 +432,7 @@ def execute_S1_PRESS_BUTTON(self):
 
                 self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
                 self.approach_button = False
-                self.wait_for_door_to_open = True
+                self.verify_door_is_open = True
                 self.previous_linear_x_mn = 0.0      
 
                 self.finished_action_time = self.get_clock().now() 
@@ -416,9 +454,9 @@ def execute_S1_PRESS_BUTTON(self):
         elsapsed_time_sec = elapsed_time.nanoseconds * 1e-9
         self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
 
-        if elsapsed_time_sec > 3.0:
+        if elsapsed_time_sec > 6.0:
             
-            self.get_logger().info('3 sec HAVE PASSED')
+            self.get_logger().info('6 sec HAVE PASSED')
             self.wait_for_door_to_open = False
             self.verify_door_is_open = True
             self.finished_action_time = None
@@ -427,9 +465,12 @@ def execute_S1_PRESS_BUTTON(self):
 
         door_thr = self.button_['door_range']
 
-        self.S1_door_open = self.left_distance > door_thr
-        self.get_logger().info(f"Door range: measured={self.left_distance:.2f}, thr={door_thr:.2f}")
+        left_distance = self.left_distance
+        if math.isinf(self.left_distance): left_distance = 100.0
 
+        self.S1_door_open = left_distance > door_thr
+        self.get_logger().info(f"Door range: measured={self.left_distance:.2f}, thr={door_thr:.2f}")
+        
         if self.S1_door_open:
 
             self.get_logger().info("DOOR IS OPEN - MOVE BACK")
@@ -449,7 +490,7 @@ def execute_S1_PRESS_BUTTON(self):
 
         self.start_x = current_x
         self.start_y = current_y
-        self.remaining_distance = -0.75
+        self.remaining_distance = -0.9
 
     elif self.go_back_button:
 
@@ -468,14 +509,15 @@ def execute_S1_PRESS_BUTTON(self):
 
                     self.get_logger().info('OVERSHOOT DETECTED') 
                     self.get_logger().info("MOVED BACK")
-
+                    self._publish_collector_servo_cmd(collector_command=[0.0])
                     self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
                     
                     self.previous_linear_x_mn = 0.0              
 
-                    if not self.S1_door_open and self.button_attempts < 2:
+                    if not self.S1_door_open and self.button_attempts < 3:
 
                         self.button_attempts += 1
+                        self._clear_costmaps()
                         
                         self.manual_recovery = True
                         self._clear_costmaps()                  
@@ -488,6 +530,7 @@ def execute_S1_PRESS_BUTTON(self):
                         self.get_logger().info("Transition to: S1_MOVE_TO_P11")
                         next_state = RobotState.S1_MOVE_TO_P11
 
+                        self.navigator._clear_costmaps()  
                         self.go_back_button = False
                         self.prepare_press_button = True
                         self.previous_state = RobotState.S1_PRESS_BUTTON
@@ -507,7 +550,7 @@ def execute_S1_PRESS_BUTTON(self):
             else:
                 
                 self.get_logger().info("MOVED BACK")
-
+                self._publish_collector_servo_cmd(collector_command=[0.0])
                 self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
 
                 self.previous_linear_x_mn = 0.0
@@ -524,6 +567,7 @@ def execute_S1_PRESS_BUTTON(self):
 
                 elif self.S1_door_open:
 
+                    self.navigator.clearLocalCostmap()
                     self.get_logger().info("Transition to: S1_MOVE_TO_P11")
                     next_state = RobotState.S1_MOVE_TO_P11
 
@@ -547,7 +591,7 @@ def execute_S1_PRESS_BUTTON(self):
 
             if self.angle_rotate_it < 6:
 
-                rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
+                rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.2, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
 
                 if not rotation_goal_reached:
 
@@ -564,6 +608,7 @@ def execute_S1_PRESS_BUTTON(self):
                 self.manual_recovery = False
                 self.go_back_button = False
                 self.prepare_press_button = True
+                self.navigator.clearLocalCostmap()
 
                 dist_to_button = math.sqrt((self.button_['y'] - current_y)**2 + (self.button_['x'] - current_x)**2)
 
@@ -596,64 +641,38 @@ def execute_S1_TRANSIT_STATE(self):
 
     else:
 
-        if not self.manual_recovery:
+        if self.navigator.isTaskComplete():
+            
+            result = self.navigator.getResult()
 
-            if self.navigator.isTaskComplete():
+            self.get_logger().info(f"Current pose in map: x={current_x:.2f}, y={current_y:.2f}, yaw={current_yaw:.2f} rad")
+
+            if result == TaskResult.SUCCEEDED:
                 
-                result = self.navigator.getResult()
+                self.get_logger().info('REACHED TRANSIENT POSE')
 
-                self.get_logger().info(f"Current pose in map: x={current_x:.2f}, y={current_y:.2f}, yaw={current_yaw:.2f} rad")
+                self.wait_for_goal = False
 
-                if result == TaskResult.SUCCEEDED:
-                    
-                    self.get_logger().info('REACHED TRANSIENT POSE')
+                self.current_mission = 2
+                self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+                next_state = RobotState.SALL_SEARCH_FOR_DUPLO
 
-                    self.wait_for_goal = False
-
-                    next_state = RobotState.S_STOP
-                    self.get_logger().info("Transition to: S_STOP")
-                    self.previous_state = RobotState.S1_TRANSIT_STATE
-
-                else:
-
-                    self._clear_costmaps()
-                    
-                    self.start_yaw = current_yaw
-
-                    self.manual_recovery = True
-
-                    self.angle_rotate_it   = 0
-                    self.angle_increment = np.pi/3.0
-        
-        elif self.manual_recovery:
-
-            if self.angle_rotate_it < 6:
-
-                rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
-
-                if not rotation_goal_reached:
-
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
-
-                else:
-                
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-                    self.start_yaw = current_yaw
-                    self.angle_rotate_it += 1
+                self.previous_state = RobotState.S1_TRANSIT_STATE
 
             else:
 
-                self.manual_recovery = False
-
-                self._navigate_to_pose(goal_x=t_x, goal_y=t_y, goal_theta=t_theta)
-                self.wait_for_goal = True    
-
-
+                self.navigator.clearLocalCostmap()
+                self.current_mission = 2
+                self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+                next_state = RobotState.SALL_SEARCH_FOR_DUPLO
+                                    
     return next_state
 
 def execute_S1_MOVE_TO_P11(self):
 
     next_state = RobotState.S1_MOVE_TO_P11
+
+    self._publish_collector_servo_cmd(collector_command=[-80.0])
 
     p11 = self.list_of_corners_Z1[1]
     p11_x = p11['x']
@@ -669,71 +688,118 @@ def execute_S1_MOVE_TO_P11(self):
         self._navigate_to_pose(goal_x=p11_x, goal_y=p11_y, goal_theta=p11_theta)
         self.wait_for_goal = True   
 
+        self.door_counter = 0.0
+
     else:
 
-        if not self.manual_recovery:
+        if self.navigator.isTaskComplete():
+            
+            result = self.navigator.getResult()
 
-            if self.navigator.isTaskComplete():
+            self.get_logger().info(f"Current pose in map: x={current_x:.2f}, y={current_y:.2f}, yaw={current_yaw:.2f} rad")
+
+            if result == TaskResult.SUCCEEDED:
                 
-                result = self.navigator.getResult()
+                self.get_logger().info('REACHED P11')
+                self.wait_for_goal = False
 
-                self.get_logger().info(f"Current pose in map: x={current_x:.2f}, y={current_y:.2f}, yaw={current_yaw:.2f} rad")
+                #next_state = RobotState.S1_SWEEP
+                #self.get_logger().info("Transition to: S1_SWEEP")
 
-                if result == TaskResult.SUCCEEDED:
-                    
-                    self.get_logger().info('REACHED P11')
-                    self.wait_for_goal = False
+                self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+                next_state = RobotState.SALL_SEARCH_FOR_DUPLO
 
-                    next_state = RobotState.SALL_SEARCH_FOR_DUPLO
-                    self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
-
-                    self.previous_state = RobotState.S1_MOVE_TO_P11
-
-                else:
-
-                    self._clear_costmaps()
-                    
-                    self.start_yaw = current_yaw
-
-                    self.manual_recovery = True
-
-                    self.angle_rotate_it   = 0
-                    self.angle_increment = np.pi/3.0
-        
-        elif self.manual_recovery:
-
-            if self.angle_rotate_it < 6:
-
-                rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
-
-                if not rotation_goal_reached:
-
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
-
-                else:
-                
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-                    self.start_yaw = current_yaw
-                    self.angle_rotate_it += 1
+                self.previous_state = RobotState.S1_MOVE_TO_P11
 
             else:
 
-                self.manual_recovery = False
+                self.navigator.clearLocalCostmap()
 
                 self._navigate_to_pose(goal_x=p11_x, goal_y=p11_y, goal_theta=p11_theta)
                 self.wait_for_goal = True 
 
+                self.door_counter += 1
+
+                if self.door_counter == 10:
+                    
+                    next_state = RobotState.S1_MOVE_TO_P10
+                    self.get_logger().info("Door is actually closed... try again")
+
+
     return next_state
 
+def execute_S1_SWEEP(self):
+
+    next_state = RobotState.S1_SWEEP
+
+    #----- Turn on collector to cleanout duplos in the way -----
+
+    self._publish_collector_servo_cmd(collector_command=[-80.0])
+
+    #-----
+
+    if self.first_time_sweep:
+
+        self.first_time_sweep = False
+        self.list_of_available_setpoints = self.list_of_mission1_hardcoded_points.copy()
+
+    if self.wait_for_goal == False:
+
+        self.get_logger().info(f"Remaining setpoints: {len(self.list_of_available_setpoints)}")
+
+        if len(self.list_of_available_setpoints) > 0:
+
+            next_point = self.list_of_available_setpoints[0]
+            self._navigate_to_pose(goal_x=next_point[0], goal_y=next_point[1], goal_theta=next_point[2])
+            self.wait_for_goal = True
+
+        else:
+
+            next_state = RobotState.S1_EXIT_ROOM
+            self.get_logger().info("Transition to state: RobotState.S1_EXIT_ROOM")
+
+    else:
+
+        if self.navigator.isTaskComplete():
+
+            self.navigator.clearLocalCostmap()
+                
+            result = self.navigator.getResult()
+
+            if result == TaskResult.SUCCEEDED:
+                    
+                self.get_logger().info('REACHED SETPOINT')
+                
+            else:
+
+                self.get_logger().info('REACHED SETPOINT')
+                
+            self.wait_for_goal = False 
+            del self.list_of_available_setpoints[0]
+
+    return next_state
+        
 def execute_SALL_SEARCH_FOR_DUPLO(self):
 
     next_state = RobotState.SALL_SEARCH_FOR_DUPLO
 
     #----- Turn off the collector while searching -----
 
-    self._publish_collector_servo_cmd(collector_command=[150.0])
+    self._publish_collector_servo_cmd(collector_command=[80.0])
 
-    #----
+    #-----
+
+    p_value = random.random()
+
+    if p_value < 0.5:
+
+        next_state = RobotState.SALL_MOVE_TO_CLOSEST_CORNER
+        self.get_logger().info("Transition to: SALL_MOVE_TO_CLOSEST_CORNER")
+        self.previous_state = RobotState.SALL_SEARCH_FOR_DUPLO
+
+        return next_state
+
+    #-----
 
     if not self.duplo_found and self.previous_state in [RobotState.SALL_MOVE_TO_CLOSEST_CORNER, RobotState.S1_MOVE_TO_P11] and not self.estimating_duplo_position:
 
@@ -744,7 +810,7 @@ def execute_SALL_SEARCH_FOR_DUPLO(self):
         self.adjust_orientation = True
 
         if self.front_distance >= 1.5:
-
+            
             self.get_logger().info("NO SEARCH ADJUSTEMENT")
             yaw = self.yaw
             yaw = normalize_angle(yaw)
@@ -809,7 +875,7 @@ def execute_SALL_SEARCH_FOR_DUPLO(self):
 
         current_yaw = self.yaw
 
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.des_theta_left, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
+        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.des_theta_left, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
 
         if not rotation_goal_reached:
 
@@ -826,7 +892,7 @@ def execute_SALL_SEARCH_FOR_DUPLO(self):
 
         current_yaw = self.yaw
 
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.des_theta_right, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
+        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.des_theta_right, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
 
         if not rotation_goal_reached:
 
@@ -843,7 +909,7 @@ def execute_SALL_SEARCH_FOR_DUPLO(self):
 
         current_yaw = self.yaw
 
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.des_theta_mid, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
+        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.des_theta_mid, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
 
         if not rotation_goal_reached:
 
@@ -896,13 +962,13 @@ def execute_SALL_MOVE_TO_DUPLO(self):
 
     #----- Turn on collector to cleanout duplos in the way -----
 
-    self._publish_collector_servo_cmd(collector_command=[150.0])
+    self._publish_collector_servo_cmd(collector_command=[-80.0])
 
     #-----
 
     if self.duplo_found:
 
-        if self.distance_to_duplo <= 0.6:
+        if self.distance_to_duplo <= 0.8:
 
             self.go_straight_to_duplo = True
             self.nav2_to_duplo        = False
@@ -910,19 +976,37 @@ def execute_SALL_MOVE_TO_DUPLO(self):
         else:
 
             self.go_straight_to_duplo = False
-            self.nav2_to_duplo        = True         
+            self.nav2_to_duplo        = True    
 
         self.current_duplo_theta = math.atan2(
-                (self.current_duplo_y - current_y),
-                (self.current_duplo_x - current_x)
-        )
+            (self.current_duplo_y - current_y),
+            (self.current_duplo_x - current_x)
+        )     
 
         self.duplo_found = False
         self.align_with_duplo = True
 
+        if self.current_duplo_x_in_frame is None: 
+            
+            self.get_logger().info("MANUAL Aligning with duplo..")
+            self.align_manual = True
+
+        else:
+
+            self.get_logger().info("AUTOMATIC Aligning with duplo..")
+            self.align_manual = False
+
     elif self.align_with_duplo:
 
-        rotation_goal_reached, angular_z_mn = execute_rotation_camera(current_x = self.current_duplo_x_in_frame, angle_tolerance=0.05, max_angular_speed=0.2, min_angular_speed=0.12, control=True)
+        if self.align_manual:
+
+            rotation_goal_reached, angular_z_mn = execute_rotation(self.current_duplo_theta, current_yaw, angle_tolerance=0.15, max_angular_speed=0.3, min_angular_speed=0.12, control=True)
+
+        else:
+
+            rotation_goal_reached, angular_z_mn = execute_rotation_camera(current_x = self.current_duplo_x_in_frame, angle_tolerance=0.15, max_angular_speed=0.3, min_angular_speed=0.12, control=True)
+
+        #-----
 
         if not rotation_goal_reached:
 
@@ -932,66 +1016,80 @@ def execute_SALL_MOVE_TO_DUPLO(self):
                 
             self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)  
             self.align_with_duplo = False  
+            self.align_manual = False
+
+            self.current_duplo_theta = current_yaw
+
+            if self.go_straight_to_duplo:
+
+                self.get_logger().info("Go straight to duplo...")
+                self.length = self.distance_to_duplo
+                self.start_distance = self.front_distance
+                
+            elif self.nav2_to_duplo:
+
+                self.get_logger().info("NAV2 to duplo...")
 
     elif self.go_straight_to_duplo:
 
-        trans_goal_reached, linear_x_mn = execute_translation_camera(self.current_duplo_y_in_frame, distance_tolerance=0.05, max_linear_speed=0.3, min_linear_speed=0.125)
+        if self.is_in_vicinity_carpet(current_x, current_y): self.get_logger().info("In the vicinity of carpet") 
 
-        if not trans_goal_reached:
+        if not self.close_to_wall() and not self.is_in_vicinity_carpet(current_x, current_y):
 
-            if self.previous_linear_x_mn * linear_x_mn >= 0:
+            trans_goal_reached, linear_x_mn = execute_translation_laser(curr_dist=self.front_distance, start_dist=self.start_distance, length=self.length, distance_tolerance=0.05, max_linear_speed=0.3, min_linear_speed=0.15)
 
-                self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0)
-                self.previous_linear_x_mn = linear_x_mn
+            if not trans_goal_reached:
+
+                if self.previous_linear_x_mn * linear_x_mn >= 0:
+
+                    self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0)
+                    self.previous_linear_x_mn = linear_x_mn
+
+                else:
+
+                    self.get_logger().info("OVERSHOOT DETECTED") 
+                    self.get_logger().info("DUPLO EXECUTED")
+
+                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0) 
+                    self.number_of_duplos_collected += 1
+
+                    if self.number_of_duplos_collected < self.duplos_capacity:
+
+                        next_state = RobotState.SALL_SEARCH_FOR_DUPLO
+                        self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+
+                    else:
+
+                        if self.current_mission == 1:
+                            next_state = RobotState.S1_EXIT_ROOM
+                            self.get_logger().info("Robot full! Transition to: S1_EXIT_ROOM")
+                        elif self.current_mission == 2:
+                            next_state = RobotState.SALL_RETURN_TO_S
+                            self.get_logger().info("Robot full! Transition to: SALL_RETURN_TO_S")
+
+                    self.previous_state = RobotState.SALL_MOVE_TO_DUPLO 
+
+                    self._best_area = -1.0
+                    self.nearest_duplo_x = None
+                    self.nearest_duplo_y = None
+
+                    self.previous_linear_x_mn = 0.0
+                    self.go_straight_to_duplo = False
+                    self.finished_action_time = None
+                    self.length = None
+                    self.start_distance = None
 
             else:
 
-                self.get_logger().info("OVERSHOOT DETECTED") 
-                self.get_logger().info("CLOSE TO DUPLO")
-
-                self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)    
-                self.go_straight_to_duplo = False 
-                self.move_to_duplo_more = True    
-
-                self.start_distance = self.front_distance
-
-        else:
-            
-            self.get_logger().info("CLOSE TO DUPLO")
-
-            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0) 
-            self.go_straight_to_duplo = False
-            self.move_to_duplo_more = True   
-
-            self.start_distance = self.front_distance
-
-    elif self.move_to_duplo_more:
-
-        length = 0.4
-
-        trans_goal_reached, linear_x_mn = execute_translation_laser(self.front_distance, self.start_distance, length, distance_tolerance=0.05, max_linear_speed=0.2, min_linear_speed=0.125)
-
-        if not trans_goal_reached:
-
-            if self.previous_linear_x_mn * linear_x_mn >= 0:
-
-                self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0)
-                self.previous_linear_x_mn = linear_x_mn
-
-            else:
-
-                self.get_logger().info("OVERSHOOT DETECTED") 
                 self.get_logger().info("DUPLO EXECUTED")
 
-                self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)    
-                self.move_to_duplo_more = False 
+                self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
                 self.number_of_duplos_collected += 1
 
                 if self.number_of_duplos_collected < self.duplos_capacity:
 
                     next_state = RobotState.SALL_SEARCH_FOR_DUPLO
                     self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
-                    self.previous_state = RobotState.SALL_MOVE_TO_DUPLO
 
                 else:
 
@@ -1002,32 +1100,35 @@ def execute_SALL_MOVE_TO_DUPLO(self):
                         next_state = RobotState.SALL_RETURN_TO_S
                         self.get_logger().info("Robot full! Transition to: SALL_RETURN_TO_S")
 
-                    self.previous_state = RobotState.SALL_MOVE_TO_DUPLO 
-        else:
-            
-            self.get_logger().info("DUPLO EXECUTED")
-
-            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0) 
-            self.move_to_duplo_more = False 
-            self.number_of_duplos_collected += 1
-
-            if self.number_of_duplos_collected < self.duplos_capacity:
-
-                next_state = RobotState.SALL_SEARCH_FOR_DUPLO
-                self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
-                self.previous_state = RobotState.SALL_MOVE_TO_DUPLO
-
-            else:
-
-                if self.current_mission == 1:
-                    next_state = RobotState.S1_EXIT_ROOM
-                    self.get_logger().info("Robot full! Transition to: S1_EXIT_ROOM")
-                elif self.current_mission == 2:
-                    next_state = RobotState.SALL_RETURN_TO_S
-                    self.get_logger().info("Robot full! Transition to: SALL_RETURN_TO_S")
+                self._best_area = -1.0
+                self.nearest_duplo_x = None
+                self.nearest_duplo_y = None
 
                 self.previous_state = RobotState.SALL_MOVE_TO_DUPLO 
 
+                self.previous_linear_x_mn = 0.0   
+                self.go_straight_to_duplo = False 
+                self.finished_action_time = None
+                self.length = None
+                self.start_distance = None
+
+        else:
+
+            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
+            self.previous_linear_x_mn = 0.0
+            self.go_straight_to_duplo = False
+            self.finished_action_time = None
+            self.length = None
+            self.start_distance = None
+
+            next_state = RobotState.SALL_SEARCH_FOR_DUPLO
+            self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+            self.previous_state = RobotState.SALL_MOVE_TO_DUPLO
+
+            self._best_area = -1.0
+            self.nearest_duplo_x = None
+            self.nearest_duplo_y = None
+            
     elif self.nav2_to_duplo:
 
         if self.wait_for_goal == False:
@@ -1037,77 +1138,59 @@ def execute_SALL_MOVE_TO_DUPLO(self):
 
         else:
 
-            if not self.manual_recovery:
+            if self.distance_to_duplo <= 0.8 and self.current_duplo_x_in_frame is not None:
+
+                self.get_logger().info(f"Distance: {self.distance_to_duplo}")
+
+                self.navigator.cancelTask()
+                self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
+
+                self.get_logger().info("CLOSE ENOUGH... Align with duplo")
+
+                self.align_with_duplo = False
+                self.go_straight_to_duplo = True
+                self.nav2_to_duplo = False
+                self.wait_for_goal = False
+
+            else:
 
                 if self.navigator.isTaskComplete():
-                    
-                    result = self.navigator.getResult()
 
-                    self.get_logger().info(f"Current pose in map: x={current_x:.2f}, y={current_y:.2f}, yaw={current_yaw:.2f} rad")
+                    self.nav2_to_duplo = False
+                    self.wait_for_goal = False 
+
+                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
+
+                    result = self.navigator.getResult()
 
                     if result == TaskResult.SUCCEEDED:
                         
-                        self.get_logger().info('EXECUTED DUPLO')
+                        if self.current_duplo_x_in_frame is not None:
 
-                        self.wait_for_goal = False
-                        self.nav2_to_duplo = False
-
-                        self.number_of_duplos_collected += 1
-
-                        if self.number_of_duplos_collected < self.duplos_capacity:
-
-                            next_state = RobotState.SALL_SEARCH_FOR_DUPLO
-                            self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
-                            self.previous_state = RobotState.SALL_MOVE_TO_DUPLO
+                            self.align_with_duplo = False
+                            self.go_straight_to_duplo = True
 
                         else:
 
-                            if self.current_mission == 1:
-                                next_state = RobotState.S1_EXIT_ROOM
-                                self.get_logger().info("Robot full! Transition to: S1_EXIT_ROOM")
-                            elif self.current_mission == 2:
-                                next_state = RobotState.SALL_RETURN_TO_S
-                                self.get_logger().info("Robot full! Transition to: SALL_RETURN_TO_S")
-
-                            self.previous_state = RobotState.SALL_MOVE_TO_DUPLO 
-
+                            self.navigator.clearLocalCostmap()
+                            next_state = RobotState.SALL_SEARCH_FOR_DUPLO
+                            self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+                            self.previous_state = RobotState.SALL_MOVE_TO_DUPLO
+                            
+                            self._best_area = -1.0
+                            self.nearest_duplo_x = None
+                            self.nearest_duplo_y = None
 
                     else:
-
-                        self._clear_costmaps()
                         
-                        self.start_yaw = current_yaw
+                        self.navigator.clearLocalCostmap()
+                        next_state = RobotState.SALL_SEARCH_FOR_DUPLO
+                        self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
+                        self.previous_state = RobotState.SALL_MOVE_TO_DUPLO
 
-                        self.manual_recovery = True
-
-                        self.angle_rotate_it   = 0
-                        self.angle_increment = np.pi/3.0
-            
-            elif self.manual_recovery:
-
-                if self.angle_rotate_it < 6:
-
-                    rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.2, control=False)
-
-                    if not rotation_goal_reached:
-
-                        self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
-
-                    else:
-                    
-                        self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-                        self.start_yaw = current_yaw
-                        self.angle_rotate_it += 1
-
-                else:
-
-                    self.manual_recovery = False
-                    self.wait_for_goal = False
-                    self.nav2_to_duplo = False
-
-                    next_state = RobotState.SALL_SEARCH_FOR_DUPLO
-                    self.get_logger().info("Transition to: SALL_SEARCH_FOR_DUPLO")
-                    self.previous_state = RobotState.SALL_MOVE_TO_DUPLO   
+                        self._best_area = -1.0
+                        self.nearest_duplo_x = None
+                        self.nearest_duplo_y = None
 
     return next_state
 
@@ -1117,7 +1200,7 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
 
     #----- Turn on the collector -----
 
-    self._publish_collector_servo_cmd(collector_command=[150.0])
+    self._publish_collector_servo_cmd(collector_command=[-80.0])
 
     #----
 
@@ -1144,15 +1227,17 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
                 (self.corner_x - current_x)
             )
 
-            distance_to_corner = math.hypot(current_x - self.corner_x, current_y - self.corner_y)
+            self.distance_to_corner = math.hypot(current_x - self.corner_x, current_y - self.corner_y)
 
-            if distance_to_corner <= 0.6:
+            if self.distance_to_corner <= 0.8:
 
+                self.get_logger().info("GOING MANUALLY TO CORNER")
                 self.go_straight_to_corner = True
                 self.nav2_to_corner        = False
 
             else:
 
+                self.get_logger().info("GOING NAV2 TO CORNER")
                 self.go_straight_to_corner = False
                 self.nav2_to_corner        = True      
 
@@ -1177,7 +1262,7 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
 
     elif self.align_corner:
     
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.corner_goal_theta, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)            
+        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.corner_goal_theta, current_theta=current_yaw, angle_tolerance=0.1, max_angular_speed=0.3, min_angular_speed=0.12, control=False)            
 
         if not rotation_goal_reached:
 
@@ -1188,36 +1273,59 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
             self.get_logger().info('ALIGNED WITH CORNER')
 
             self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-            self.align_corner = False  
+            self.align_corner = False 
+
+            self.length = max(self.front_distance - 0.0, 0.0)
+            self.start_distance = self.front_distance
 
     elif self.go_straight_to_corner:
 
-        trans_goal_reached, linear_x_mn = execute_translation(self.corner_x, self.corner_y, current_x, current_y, current_yaw, distance_tolerance=0.1, max_linear_speed=0.2, min_linear_speed=0.125)
+        if not self.close_to_wall() and not self.is_in_vicinity_carpet(current_x, current_y):
 
-        if not trans_goal_reached:
+            trans_goal_reached, linear_x_mn = execute_translation_laser(curr_dist=self.front_distance, start_dist=self.start_distance, length=self.length, distance_tolerance=0.05, max_linear_speed=0.2, min_linear_speed=0.15)
 
-            if self.previous_linear_x_mn * linear_x_mn >= 0:
+            if not trans_goal_reached:
 
-                self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0)
-                self.previous_linear_x_mn = linear_x_mn
+                if self.previous_linear_x_mn * linear_x_mn >= 0:
 
+                    self._publish_cmd_vel(linear_x=linear_x_mn, angular_z=0.0)
+                    self.previous_linear_x_mn = linear_x_mn
+
+                else:
+                    
+                    self.get_logger().info('OVERSHOOT DETECTED') 
+                    self.get_logger().info("REACHED CORNER")
+                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
+                    self.go_straight_to_corner = False
+                    self.match_corner_orientation = True
+
+                    self.previous_linear_x_mn = 0.0
+                    self.finished_action_time = None
+                    self.length = None
+                    self.start_distance = None
+                    
             else:
-                
-                self.get_logger().info('OVERSHOOT DETECTED') 
-                self.get_logger().info("REACHED CORNER")
+
+                self.get_logger().info("REACHED CORNER") 
                 self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
                 self.go_straight_to_corner = False
                 self.match_corner_orientation = True
-                self.previous_linear_x_mn = 0.0
-                
+
+                self.previous_linear_x_mn = 0.0  
+                self.finished_action_time = None    
+                self.length = None
+                self.start_distance = None
+
         else:
 
-            self.get_logger().info("REACHED CORNER") 
-            self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
             self.go_straight_to_corner = False
             self.match_corner_orientation = True
-            self.previous_linear_x_mn = 0.0      
 
+            self.previous_linear_x_mn = 0.0
+            self.finished_action_time = None
+            self.length = None
+            self.start_distance = None
+            
     elif self.nav2_to_corner:
 
         if not self.wait_for_goal:
@@ -1227,56 +1335,27 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
 
         else:  
 
-            if not self.manual_recovery: 
+            if self.navigator.isTaskComplete():
+            
+                result = self.navigator.getResult()
 
-                if self.navigator.isTaskComplete():
-                
-                    result = self.navigator.getResult()
-
-                    if result == TaskResult.SUCCEEDED:
-                            
-                        self.get_logger().info('REACHED CORNER')
-                        self.wait_for_goal = False
-                        self.nav2_to_corner = False
-                        self.match_corner_orientation = True                  
-
-                    else:
-
-                        self._clear_costmaps()
+                if result == TaskResult.SUCCEEDED:
                         
-                        self.start_yaw = current_yaw
-
-                        self.manual_recovery = True
-
-                        self.angle_rotate_it   = 0
-                        self.angle_increment = np.pi/3.0
-
-
-            elif self.manual_recovery:
-
-                if self.angle_rotate_it < 6:
-
-                    rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
-
-                    if not rotation_goal_reached:
-
-                        self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
-
-                    else:
-                    
-                        self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-                        self.start_yaw = current_yaw
-                        self.angle_rotate_it += 1
+                    self.get_logger().info('REACHED CORNER')
+                    self.wait_for_goal = False
+                    self.nav2_to_corner = False
+                    self.match_corner_orientation = True                  
 
                 else:
 
-                    self.manual_recovery = False
+                    self.navigator.clearLocalCostmap()
+                    self.wait_for_goal = False
+                    self.nav2_to_corner = False
+                    self.match_corner_orientation = True 
 
-                    self._navigate_to_pose(goal_x=self.corner_x, goal_y=self.corner_y, goal_theta=self.corner_goal_theta)
-    
     elif self.match_corner_orientation:
 
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.corner_theta, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)            
+        rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.corner_theta, current_theta=current_yaw, angle_tolerance=0.1, max_angular_speed=0.5, min_angular_speed=0.12, control=False)            
 
         if not rotation_goal_reached:
 
@@ -1284,8 +1363,8 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
 
         else:
 
-            self._clear_costmaps()
-            
+            self.navigator.clearLocalCostmap()
+
             self.get_logger().info('CORNER ORIENTATION MATCHED')
 
             self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
@@ -1297,6 +1376,9 @@ def execute_SALL_MOVE_TO_CLOSEST_CORNER(self):
 
             if self.current_mission == 1 and len(self.mission1_available_corners) > 0 :
                 del self.mission1_available_corners[self.corner_idx] 
+
+            if self.current_mission == 2 and len(self.mission2_available_corners) > 0 :
+                del self.mission2_available_corners[self.corner_idx] 
 
             #----- We don't remove the corners for the second mission -----
                            
@@ -1337,6 +1419,7 @@ def execute_S1_EXIT_ROOM(self):
 
         else:
 
+            self.navigator.clearLocalCostmap()
             self.approach_exit = True
 
         self.prepare_exit = False
@@ -1395,24 +1478,8 @@ def execute_S1_EXIT_ROOM(self):
         
         elif self.manual_recovery:
 
-            if self.angle_rotate_it < 6:
-
-                rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
-
-                if not rotation_goal_reached:
-
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
-
-                else:
-                
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-                    self.start_yaw = current_yaw
-                    self.angle_rotate_it += 1
-
-            else:
-
-                self.manual_recovery = False
-                self._navigate_to_pose(goal_x=pEX_x, goal_y=pEX_y, goal_theta=pEX_theta)
+            self.manual_recovery = False
+            self._navigate_to_pose(goal_x=pEX_x, goal_y=pEX_y, goal_theta=pEX_theta)
 
     elif self.exit_door:
 
@@ -1454,24 +1521,8 @@ def execute_S1_EXIT_ROOM(self):
         
         elif self.manual_recovery:
 
-            if self.angle_rotate_it < 6:
-
-                rotation_goal_reached, angular_z_mn = execute_rotation(angle=self.start_yaw + self.angle_increment, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
-
-                if not rotation_goal_reached:
-
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=angular_z_mn)
-
-                else:
-                
-                    self._publish_cmd_vel(linear_x=0.0, angular_z=0.0)
-                    self.start_yaw = current_yaw
-                    self.angle_rotate_it += 1
-
-            else:
-
-                self.manual_recovery = False
-                self._navigate_to_pose(goal_x=p10_x, goal_y=p10_y, goal_theta=p10_theta)
+            self.manual_recovery = False
+            self._navigate_to_pose(goal_x=p10_x, goal_y=p10_y, goal_theta=p10_theta)
 
     return next_state
 
@@ -1493,7 +1544,7 @@ def execute_SALL_RETURN_TO_S(self):
 
     if dist_to_S > 1.0:
 
-        self._publish_collector_servo_cmd(collector_command=[150.0])    
+        self._publish_collector_servo_cmd(collector_command=[-80.0])    
 
     else:
 
@@ -1568,8 +1619,8 @@ def execute_SALL_DELOAD(self):
 
     deload_theta = -np.pi/4
 
-    deload_x = self.S_pose['x'] + 0.3
-    deload_y = self.S_pose['y'] - 0.3
+    deload_x = self.S_pose['x'] + 0.5
+    deload_y = self.S_pose['y'] - 0.5
 
     current_x   = self.trans.transform.translation.x
     current_y   = self.trans.transform.translation.y
@@ -1577,7 +1628,7 @@ def execute_SALL_DELOAD(self):
 
     if self.prepare_deload:
 
-        rotation_goal_reached, angular_z_mn = execute_rotation(angle=deload_theta, current_theta=current_yaw, angle_tolerance=0.05, max_angular_speed=0.3, min_angular_speed=0.12, control=False)
+        rotation_goal_reached, angular_z_mn = execute_rotation(angle=deload_theta, current_theta=current_yaw, angle_tolerance=0.1, max_angular_speed=0.8, min_angular_speed=0.12, control=False)
 
         if not rotation_goal_reached:
 
@@ -1665,6 +1716,8 @@ StateMachineNode._clear_costmaps      = _clear_costmaps
 StateMachineNode._detect_next_duplo   = _detect_next_duplo
 StateMachineNode._get_closest_non_visited_corner  = _get_closest_non_visited_corner
 StateMachineNode.is_in_carpet                     = is_in_carpet
+StateMachineNode.close_to_wall                    = close_to_wall
+StateMachineNode.is_in_vicinity_carpet            = is_in_vicinity_carpet
 
 StateMachineNode.execute_S0_BOOT                     = execute_S0_BOOT
 StateMachineNode.execute_S_STOP                      = execute_S_STOP
@@ -1679,3 +1732,4 @@ StateMachineNode.execute_SALL_MOVE_TO_CLOSEST_CORNER = execute_SALL_MOVE_TO_CLOS
 StateMachineNode.execute_S1_EXIT_ROOM                = execute_S1_EXIT_ROOM
 StateMachineNode.execute_SALL_RETURN_TO_S            = execute_SALL_RETURN_TO_S
 StateMachineNode.execute_SALL_DELOAD                 = execute_SALL_DELOAD
+StateMachineNode.execute_S1_SWEEP                    = execute_S1_SWEEP

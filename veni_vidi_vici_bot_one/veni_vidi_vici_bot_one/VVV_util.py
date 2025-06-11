@@ -116,7 +116,7 @@ def execute_translation_distance(distance, start_x, start_y, current_x, current_
 
 def execute_translation_lidar(curr_dist, distance_tolerance, max_linear_speed, min_linear_speed):
 
-    current_distance_to_goal = curr_dist - 0.225
+    current_distance_to_goal = curr_dist - 0.25 #0.225
 
     linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
     linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
@@ -142,7 +142,9 @@ def execute_translation_camera(current_y, distance_tolerance, max_linear_speed, 
 
     current_distance_to_goal = np.abs(-0.9 - current_y)
 
-    linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
+    #linear_speed = np.exp(np.abs(current_distance_to_goal)*2-1) * np.abs(max_linear_speed)
+    linear_speed = np.arctan(np.abs(current_distance_to_goal))
+
     linear_speed = max(min(linear_speed, max_linear_speed), min_linear_speed)
 
     target_x_speed = 0 if current_distance_to_goal <= distance_tolerance else  linear_speed

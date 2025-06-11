@@ -254,22 +254,22 @@ def generate_launch_description():
     )
 
     delayed_image_node = TimerAction(
-        period=5.0, 
+        period=15.0, 
         actions=[image_node]
     )
 
     delayed_duplo_node = TimerAction(
-        period=5.0, 
+        period=15.0, 
         actions=[duplo_node]
     )
 
     delayed_duplo_pos_node = TimerAction(
-        period=5.0, 
+        period=15.0, 
         actions=[duplo_pos_node]
     )
 
     delayed_button_pos_node = TimerAction(
-        period=5.0, 
+        period=15.0, 
         actions=[button_pos_node]
     )
 
