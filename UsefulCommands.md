@@ -86,3 +86,4 @@ ros2 launch veni_vidi_vici_bot_one VVV_launch_robot.launch.py activate_nav:=true
 
 ros2 topic pub /start_signal std_msgs/msg/Empty '{}'
 
+ bash -x src/veni_vidi_vici_bot_one/veni_vidi_vici_bot_one/go_bot.sh

@@ -191,7 +191,7 @@ class StateMachineNode(Node):
         self.number_of_duplos_collected = 0.0
 
         self.prepare_exit = True
-        self.exit_protection = False
+        self.exit_protection = True
         self.rotate_exit = False
         self.approach_exit = False
         self.exit_door = False
@@ -225,6 +225,11 @@ class StateMachineNode(Node):
             [10.0, 3.5, -np.pi/2]
         ]
         self.first_time_sweep2 = True        
+
+        self.corners_visited = 0.0
+
+        self.list_of_corners_Z12 = None
+        self.list_of_corners_Z22 = None
 
         #----- Temporary -----
 
@@ -568,7 +573,65 @@ class StateMachineNode(Node):
 
             self.get_logger().info("FAILED TO LOAD BUTTON PRESS POSE") 
 
-        return len(self.list_of_timeouts) == 3 and len(self.list_of_corners_Z1) == 8 and len(self.list_of_corners_Z2) == 8 and len(self.list_of_corners_Z3) == 5
+        #------
+
+        try:
+            zone12_csv_path = os.path.join(
+                get_package_share_directory('veni_vidi_vici_bot_one'),
+                'general',
+                'mission12_points_pose.csv'
+            )     
+
+            with open(zone12_csv_path, mode='r') as csv_file:
+
+                reader = csv.DictReader(csv_file)
+
+                for row in reader:
+
+                    corner_point = {}
+
+                    corner_point['x']     = float(row['x'])
+                    corner_point['y']     = float(row['y'])
+                    corner_point['theta'] = float(row['theta'])
+
+                    self.list_of_corners_Z12.append(corner_point)
+
+            self.get_logger().info("SUCCESFULLY LOADED ZONE 12 POINTS") 
+
+        except Exception as e:   
+
+            self.get_logger().info("FAILED TO LOAD ZONE 12 POINTS")  
+
+        #------
+
+        try:
+            zone22_csv_path = os.path.join(
+                get_package_share_directory('veni_vidi_vici_bot_one'),
+                'general',
+                'mission22_points_pose.csv'
+            )     
+
+            with open(zone22_csv_path, mode='r') as csv_file:
+
+                reader = csv.DictReader(csv_file)
+
+                for row in reader:
+
+                    corner_point = {}
+
+                    corner_point['x']     = float(row['x'])
+                    corner_point['y']     = float(row['y'])
+                    corner_point['theta'] = float(row['theta'])
+
+                    self.list_of_corners_Z22.append(corner_point)
+
+            self.get_logger().info("SUCCESFULLY LOADED ZONE 22 POINTS") 
+
+        except Exception as e:   
+
+            self.get_logger().info("FAILED TO LOAD ZONE 22 POINTS") 
+
+        return len(self.list_of_timeouts) == 3 and len(self.list_of_corners_Z1) == 5 and len(self.list_of_corners_Z2) == 6 and len(self.list_of_corners_Z3) == 5
 
     def _mission_reset_params(self):
 
@@ -624,7 +687,7 @@ class StateMachineNode(Node):
         self.length = None
 
         self.prepare_exit = True
-        self.exit_protection = False
+        self.exit_protection = True
         self.rotate_exit = False
         self.approach_exit = False
         self.exit_door = False
@@ -731,7 +794,7 @@ class StateMachineNode(Node):
             if next_state in [RobotState.S1_MOVE_TO_P10, RobotState.S1_PRESS_BUTTON, RobotState.S1_MOVE_TO_P11]:
 
                 next_state = RobotState.S1_TRANSIT_STATE
-                self._mission1_reset_params()
+                self._mission_reset_params()
 
             elif next_state in [RobotState.SALL_SEARCH_FOR_DUPLO, RobotState.SALL_MOVE_TO_DUPLO, RobotState.SALL_MOVE_TO_CLOSEST_CORNER]:
 
@@ -745,6 +808,15 @@ class StateMachineNode(Node):
             self.running_timeout2 = True
 
             self.get_logger().info("TIMEOUT 2 REACHED")     
+
+            next_state = RobotState.SALL_RETURN_TO_S   
+            self._mission_reset_params()
+
+        if  self.elapsed_time > self.list_of_timeouts[2]:
+
+            self.running_timeout3 = True
+
+            self.get_logger().info("TIMEOUT 3 REACHED")     
 
             next_state = RobotState.SALL_RETURN_TO_S   
             self._mission_reset_params()

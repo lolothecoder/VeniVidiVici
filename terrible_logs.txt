@@ -1,0 +1,302 @@
+VVV_sm_node]: Publishing Initial Pose
+[amcl-11] [INFO] [1749647782.444994398] [amcl]: initialPoseReceived
+[amcl-11] [WARN] [1749647782.445398954] [amcl]: Failed to transform initial pose in time (Lookup would require extrapolation into the future.  Requested time 1749647782.445287 but the latest data is at time 1749647782.437097, when looking up transform from frame [base_footprint] to frame [odom])
+[amcl-11] [INFO] [1749647782.445466843] [amcl]: Setting pose (1749647782.445466): 4.500 4.500 0.000
+[VVV_sm_node-24] [INFO] [1749647782.445893881] [VVV_sm_node]: Costmap init !!
+[VVV_sm_node-24] [INFO] [1749647782.477023813] [VVV_sm_node]: Done costmap init !!
+[VVV_sm_node-24] [INFO] [1749647782.478287687] [VVV_sm_node]: SUCCESFULLY LOADED TRANSIENT POSE
+[VVV_sm_node-24] [INFO] [1749647782.480859805] [VVV_sm_node]: SUCCESFULLY LOADED S POSE
+[VVV_sm_node-24] [INFO] [1749647782.483169181] [VVV_sm_node]: SUCCESFULLY LOADED TIMEOUTS
+[VVV_sm_node-24] [INFO] [1749647782.485756762] [VVV_sm_node]: SUCCESFULLY LOADED ZONE 1 POINTS
+[VVV_sm_node-24] [INFO] [1749647782.487119635] [VVV_sm_node]: SUCCESFULLY LOADED ZONE 2 POINTS
+[VVV_sm_node-24] [INFO] [1749647782.488481472] [VVV_sm_node]: SUCCESFULLY LOADED ZONE 3 POINTS
+[VVV_sm_node-24] [INFO] [1749647782.490234606] [VVV_sm_node]: SUCCESFULLY LOADED BUTTON PRESS POSE
+[VVV_sm_node-24] [INFO] [1749647782.491829611] [VVV_sm_node]: FAILED TO LOAD ZONE 12 POINTS
+[VVV_sm_node-24] [INFO] [1749647782.493474670] [VVV_sm_node]: FAILED TO LOAD ZONE 22 POINTS
+[VVV_sm_node-24] [INFO] [1749647782.511890495] [VVV_sm_node]: Done initializing !!
+[VVV_sm_node-24] [INFO] [1749647782.523233173] [VVV_sm_node]: State: S0_BOOT
+[VVV_sm_node-24] [INFO] [1749647782.530541284] [VVV_sm_node]: Transition to: SALL_READY
+[VVV_sm_node-24] [INFO] [1749647782.715727463] [VVV_sm_node]: Could not transform base_link to map: Lookup would require extrapolation into the past.  Requested time 1749647782.703110 but the earliest data is at time 1749647783.438983, when looking up transform from frame [base_link] to frame [map]
+[VVV_sm_node-24] [INFO] [1749647782.918954318] [VVV_sm_node]: Could not transform base_link to map: Lookup would require extrapolation into the past.  Requested time 1749647782.871716 but the earliest data is at time 1749647783.438983, when looking up transform from frame [base_link] to frame [map]
+[VVV_sm_node-24] [INFO] [1749647783.122047043] [VVV_sm_node]: Could not transform base_link to map: Lookup would require extrapolation into the past.  Requested time 1749647783.105425 but the earliest data is at time 1749647783.438983, when looking up transform from frame [base_link] to frame [map]
+[VVV_sm_node-24] [INFO] [1749647783.322876263] [VVV_sm_node]: Could not transform base_link to map: Lookup would require extrapolation into the past.  Requested time 1749647783.273229 but the earliest data is at time 1749647783.438983, when looking up transform from frame [base_link] to frame [map]
+[VVV_sm_node-24] [INFO] [1749647806.490118017] [VVV_sm_node]: Transition to: S1_MOVE_TO_P10
+[VVV_sm_node-24] [INFO] [1749647806.694668883] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[bt_navigator-20] [ERROR] [1749647817.078978677] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647817.095568351] [VVV_sm_node]: Current pose in map: x=7.12, y=3.79, yaw=-0.22 rad
+[VVV_sm_node-24] [INFO] [1749647833.720748991] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[bt_navigator-20] [ERROR] [1749647833.802147762] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647833.891236145] [VVV_sm_node]: Current pose in map: x=7.13, y=3.64, yaw=-0.19 rad
+[VVV_sm_node-24] [INFO] [1749647849.097990346] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[controller_server-16] [ERROR] [1749647881.680564580] [controller_server]: Failed to make progress
+[bt_navigator-20] [ERROR] [1749647881.754546984] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647881.834671922] [VVV_sm_node]: Current pose in map: x=11.64, y=0.98, yaw=2.59 rad
+[VVV_sm_node-24] [INFO] [1749647897.491254734] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[bt_navigator-20] [ERROR] [1749647897.600969291] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647897.691031647] [VVV_sm_node]: Current pose in map: x=11.15, y=1.73, yaw=-3.09 rad
+[VVV_sm_node-24] [INFO] [1749647919.289801841] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[VVV_sm_node-24] [INFO] [1749647939.765134644] [VVV_sm_node]: Current pose in map: x=11.36, y=0.92, yaw=-0.15 rad
+[VVV_sm_node-24] [INFO] [1749647939.771518476] [VVV_sm_node]: REACHED P10
+[VVV_sm_node-24] [INFO] [1749647939.772222941] [VVV_sm_node]: Transition to: S1_PRESS_BUTTON
+[VVV_sm_node-24] [INFO] [1749647942.502740925] [VVV_sm_node]: ADJUSTED WALL ORIENTATION
+[VVV_sm_node-24] [INFO] [1749647943.494661388] [VVV_sm_node]: ADJUSTED BUTTON ORIENTATION
+[VVV_sm_node-24] [INFO] [1749647945.289175570] [VVV_sm_node]: BUTTON APROACHED
+[VVV_sm_node-24] [INFO] [1749647951.487773707] [VVV_sm_node]: 6 sec HAVE PASSED
+[VVV_sm_node-24] [INFO] [1749647951.688495466] [VVV_sm_node]: Door range: measured=6.51, thr=2.00
+[VVV_sm_node-24] [INFO] [1749647951.689544988] [VVV_sm_node]: DOOR IS OPEN - MOVE BACK
+[VVV_sm_node-24] [INFO] [1749647956.097008928] [VVV_sm_node]: MOVED BACK
+[VVV_sm_node-24] [INFO] [1749647956.133807605] [VVV_sm_node]: Transition to: S1_MOVE_TO_P11
+[VVV_sm_node-24] [INFO] [1749647956.292356378] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647958.418937539] [bt_navigator_navigate_to_pose_rclcpp_node]: Failed to get result for follow_path in node halt!
+[bt_navigator-20] [ERROR] [1749647958.456562273] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647958.499513003] [VVV_sm_node]: Current pose in map: x=11.37, y=0.89, yaw=1.24 rad
+[VVV_sm_node-24] [INFO] [1749647958.540580265] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647958.677890461] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647958.712837781] [VVV_sm_node]: Current pose in map: x=11.32, y=0.97, yaw=1.29 rad
+[VVV_sm_node-24] [INFO] [1749647958.737330626] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647959.671179182] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647959.701401359] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647959.736240030] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647960.672716390] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647960.699959151] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647960.728886527] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647962.675688048] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647962.714704008] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647962.763867978] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647963.667920084] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647963.704222667] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647963.736680294] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647964.677126668] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647964.731995154] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647964.805708619] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647965.673157828] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647965.720718404] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647965.749568707] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647966.675159560] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647966.697989161] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647966.737824531] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749647969.644332937] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647969.698386921] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647969.736968954] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[VVV_sm_node-24] [INFO] [1749647969.752429553] [VVV_sm_node]: Door is actually closed... try again
+[bt_navigator-20] [ERROR] [1749647969.811478717] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647969.890902939] [VVV_sm_node]: Current pose in map: x=11.31, y=0.97, yaw=1.31 rad
+[VVV_sm_node-24] [INFO] [1749647983.089088989] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[controller_server-16] [ERROR] [1749647998.870855661] [controller_server]: Failed to make progress
+[bt_navigator-20] [ERROR] [1749647998.938373073] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749647998.955841474] [VVV_sm_node]: Current pose in map: x=11.47, y=1.04, yaw=-0.41 rad
+[VVV_sm_node-24] [INFO] [1749648015.489433016] [VVV_sm_node]: Navigating to goal: 11.5 1.0...
+[VVV_sm_node-24] [INFO] [1749648019.892731432] [VVV_sm_node]: Current pose in map: x=11.50, y=1.03, yaw=-0.10 rad
+[VVV_sm_node-24] [INFO] [1749648019.893626545] [VVV_sm_node]: REACHED P10
+[VVV_sm_node-24] [INFO] [1749648019.894705363] [VVV_sm_node]: Transition to: S1_PRESS_BUTTON
+[VVV_sm_node-24] [INFO] [1749648020.301150788] [VVV_sm_node]: ADJUSTED WALL ORIENTATION
+[VVV_sm_node-24] [INFO] [1749648023.694522181] [VVV_sm_node]: ADJUSTED BUTTON ORIENTATION
+[VVV_sm_node-24] [INFO] [1749648026.887888201] [VVV_sm_node]: BUTTON APROACHED
+[VVV_sm_node-24] [INFO] [1749648033.090924259] [VVV_sm_node]: 6 sec HAVE PASSED
+[VVV_sm_node-24] [INFO] [1749648033.313427111] [VVV_sm_node]: Door range: measured=inf, thr=2.00
+[VVV_sm_node-24] [INFO] [1749648033.314198447] [VVV_sm_node]: DOOR IS OPEN - MOVE BACK
+[VVV_sm_node-24] [INFO] [1749648037.296634017] [VVV_sm_node]: MOVED BACK
+[VVV_sm_node-24] [INFO] [1749648037.325943952] [VVV_sm_node]: Transition to: S1_MOVE_TO_P11
+[VVV_sm_node-24] [INFO] [1749648037.496760398] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648037.585017167] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648037.692411453] [VVV_sm_node]: Current pose in map: x=11.25, y=1.01, yaw=0.03 rad
+[VVV_sm_node-24] [INFO] [1749648037.728888556] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648037.803126488] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648037.893200558] [VVV_sm_node]: Current pose in map: x=11.25, y=1.01, yaw=0.03 rad
+[VVV_sm_node-24] [INFO] [1749648037.936762774] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648039.664271854] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648039.704716487] [VVV_sm_node]: Current pose in map: x=11.27, y=1.02, yaw=0.01 rad
+[VVV_sm_node-24] [INFO] [1749648039.736801170] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648042.671536026] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648042.693974126] [VVV_sm_node]: Current pose in map: x=11.27, y=1.02, yaw=0.01 rad
+[VVV_sm_node-24] [INFO] [1749648042.738226178] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648043.707444371] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648043.746532167] [VVV_sm_node]: Current pose in map: x=11.27, y=1.02, yaw=0.01 rad
+[VVV_sm_node-24] [INFO] [1749648043.783073715] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648044.658511309] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648044.702556897] [VVV_sm_node]: Current pose in map: x=11.27, y=1.02, yaw=0.01 rad
+[VVV_sm_node-24] [INFO] [1749648044.736220770] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[bt_navigator-20] [ERROR] [1749648045.671592090] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648045.697738665] [VVV_sm_node]: Current pose in map: x=11.27, y=1.02, yaw=0.01 rad
+[VVV_sm_node-24] [INFO] [1749648045.734977178] [VVV_sm_node]: Navigating to goal: 11.0 3.0...
+[VVV_sm_node-24] [INFO] [1749648046.589594399] [VVV_sm_node]: TIMEOUT 1 REACHED
+[bt_navigator-20] [ERROR] [1749648046.667968862] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648046.689662535] [VVV_sm_node]: Navigating to goal: 10.5 0.0...
+[VVV_sm_node-24] [INFO] [1749648055.386163994] [VVV_sm_node]: Current pose in map: x=10.66, y=-0.00, yaw=-3.13 rad
+[VVV_sm_node-24] [INFO] [1749648055.391801010] [VVV_sm_node]: REACHED TRANSIENT POSE
+[VVV_sm_node-24] [INFO] [1749648055.392720550] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648055.493487188] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648055.693486942] [VVV_sm_node]: GOING MANUALLY TO CORNER
+[VVV_sm_node-24] [INFO] [1749648055.892678638] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648066.537483581] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648066.541260925] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648066.693289803] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648066.896640234] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648075.697935608] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648075.889921582] [VVV_sm_node]: Navigating to goal: 9.5 1.0...
+[controller_server-16] [ERROR] [1749648078.290591213] [DWBLocalPlanner]: No valid trajectories out of 419! 
+[controller_server-16] [ERROR] [1749648078.290768658] [DWBLocalPlanner]: 1.00: BaseObstacle/Trajectory Hits Obstacle.
+[controller_server-16] [ERROR] [1749648078.574631968] [DWBLocalPlanner]: No valid trajectories out of 419! 
+[controller_server-16] [ERROR] [1749648078.574742709] [DWBLocalPlanner]: 1.00: BaseObstacle/Trajectory Hits Obstacle.
+[controller_server-16] [ERROR] [1749648078.893903213] [DWBLocalPlanner]: No valid trajectories out of 419! 
+[controller_server-16] [ERROR] [1749648078.893950009] [DWBLocalPlanner]: 1.00: BaseObstacle/Trajectory Hits Obstacle.
+[VVV_sm_node-24] [INFO] [1749648088.723705047] [VVV_sm_node]: REACHED CORNER
+[VVV_sm_node-24] [INFO] [1749648091.351608417] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648091.363384396] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648091.689964108] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648091.894823879] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648100.514024529] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648100.693023208] [VVV_sm_node]: Navigating to goal: 7.25 3.0...
+[controller_server-16] [ERROR] [1749648123.770671829] [controller_server]: Failed to make progress
+[bt_navigator-20] [ERROR] [1749648123.836594092] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648126.927239652] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648126.929933363] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648127.088085541] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648127.293050297] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648133.488432859] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648133.694619416] [VVV_sm_node]: Navigating to goal: 8.0 4.0...
+[controller_server-16] [ERROR] [1749648147.984389107] [controller_server]: Failed to make progress
+[VVV_sm_node-24] [INFO] [1749648153.734845454] [VVV_sm_node]: REACHED CORNER
+[VVV_sm_node-24] [INFO] [1749648159.934530576] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648159.935466801] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648160.093788184] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648160.287838171] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648163.893367784] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648164.091457338] [VVV_sm_node]: Navigating to goal: 5.5 3.5...
+[VVV_sm_node-24] [INFO] [1749648176.092805564] [VVV_sm_node]: REACHED CORNER
+[VVV_sm_node-24] [INFO] [1749648180.920925834] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648180.922961932] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648181.087333094] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648181.291841780] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648182.705860120] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648182.889911468] [VVV_sm_node]: Navigating to goal: 8.0 -2.0...
+[planner_server-18] [ERROR] [1749648199.319811005] [planner_server]: Failed to create a plan from potential when a legal potential was found. This shouldn't happen.
+[bt_navigator-20] [ERROR] [1749648199.407852298] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648207.510131920] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648207.519781725] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648207.689140088] [VVV_sm_node]: FOUND A FEASIBLE DUPLO
+[VVV_sm_node-24] [INFO] [1749648207.690188425] [VVV_sm_node]: DUPLO DETECTED: x=6.901579135218175 y=1.865843323781353
+[VVV_sm_node-24] [INFO] [1749648207.692582117] [VVV_sm_node]: Transition to: SALL_MOVE_TO_DUPLO
+[VVV_sm_node-24] [INFO] [1749648207.964465278] [VVV_sm_node]: AUTOMATIC Aligning with duplo..
+[VVV_sm_node-24] [INFO] [1749648208.168518815] [VVV_sm_node]: Go straight to duplo...
+[VVV_sm_node-24] [INFO] [1749648211.333326168] [VVV_sm_node]: DUPLO EXECUTED
+[VVV_sm_node-24] [INFO] [1749648211.334944876] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648211.488320934] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648211.690385762] [VVV_sm_node]: NO MORE CORNERS
+[VVV_sm_node-24] [INFO] [1749648211.691115301] [VVV_sm_node]: Transition to: SALL_RETURN_TO_S
+[VVV_sm_node-24] [INFO] [1749648211.894007391] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[controller_server-16] [ERROR] [1749648232.443624862] [controller_server]: Failed to make progress
+[bt_navigator-20] [ERROR] [1749648232.515956110] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648232.699449904] [VVV_sm_node]: Current pose in map: x=4.78, y=4.34, yaw=2.78 rad
+[VVV_sm_node-24] [INFO] [1749648254.297034649] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[controller_server-16] [ERROR] [1749648264.324985287] [controller_server]: Failed to make progress
+[bt_navigator-20] [ERROR] [1749648264.413639861] [bt_navigator]: Goal failed
+[VVV_sm_node-24] [INFO] [1749648264.497874348] [VVV_sm_node]: Current pose in map: x=4.77, y=4.34, yaw=-0.40 rad
+[VVV_sm_node-24] [INFO] [1749648286.499928915] [VVV_sm_node]: TIMEOUT 2 REACHED
+[VVV_sm_node-24] [INFO] [1749648286.688849080] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648293.919462596] [VVV_sm_node]: Current pose in map: x=4.88, y=4.40, yaw=2.18 rad
+[VVV_sm_node-24] [INFO] [1749648293.920188062] [VVV_sm_node]: REACHED S
+[VVV_sm_node-24] [INFO] [1749648293.920900619] [VVV_sm_node]: Transition to: SALL_DELOAD
+[VVV_sm_node-24] [INFO] [1749648298.692924069] [VVV_sm_node]: FINISHED ALIGNING DELOAD
+[VVV_sm_node-24] [INFO] [1749648303.690796408] [VVV_sm_node]: OVERSHOOT DETECTED
+[VVV_sm_node-24] [INFO] [1749648303.693670750] [VVV_sm_node]: FINISHED MOVING
+[VVV_sm_node-24] [INFO] [1749648303.696391888] [VVV_sm_node]: FINISHED DELOAD
+[VVV_sm_node-24] [INFO] [1749648303.701277309] [VVV_sm_node]: Transition to: SALL_READY
+[VVV_sm_node-24] [INFO] [1749648303.980927407] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648304.093157329] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648304.288299124] [VVV_sm_node]: GOING MANUALLY TO CORNER
+[VVV_sm_node-24] [INFO] [1749648307.900160829] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648308.092410004] [VVV_sm_node]: OVERSHOOT DETECTED
+[VVV_sm_node-24] [INFO] [1749648308.093949045] [VVV_sm_node]: REACHED CORNER
+[VVV_sm_node-24] [INFO] [1749648309.924592046] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648309.926008939] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648310.293967259] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648310.490673577] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648311.305910117] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648311.488867895] [VVV_sm_node]: Navigating to goal: 7.25 3.0...
+[VVV_sm_node-24] [INFO] [1749648321.179553413] [VVV_sm_node]: REACHED CORNER
+[VVV_sm_node-24] [INFO] [1749648323.344327363] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648323.368506934] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648323.490946219] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648323.690678361] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648332.489260023] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648332.690690040] [VVV_sm_node]: Navigating to goal: 8.0 4.0...
+[VVV_sm_node-24] [INFO] [1749648341.128454267] [VVV_sm_node]: REACHED CORNER
+[VVV_sm_node-24] [INFO] [1749648348.323230277] [VVV_sm_node]: CORNER ORIENTATION MATCHED
+[VVV_sm_node-24] [INFO] [1749648348.324084372] [VVV_sm_node]: Transition to: SALL_SEARCH_FOR_DUPLO
+[VVV_sm_node-24] [INFO] [1749648348.497304270] [VVV_sm_node]: Transition to: SALL_MOVE_TO_CLOSEST_CORNER
+[VVV_sm_node-24] [INFO] [1749648348.693380699] [VVV_sm_node]: GOING NAV2 TO CORNER
+[VVV_sm_node-24] [INFO] [1749648352.095181521] [VVV_sm_node]: ALIGNED WITH CORNER
+[VVV_sm_node-24] [INFO] [1749648352.308474019] [VVV_sm_node]: Navigating to goal: 9.5 1.0...
+[VVV_sm_node-24] [INFO] [1749648361.624486287] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648361.692470987] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648361.708955221] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648361.889140844] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648361.953527478] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648362.094015651] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648362.135819663] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648362.300208387] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648362.324479959] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648362.488890128] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648362.500983941] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648362.696076516] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648362.741563390] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648362.902170715] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648362.926960177] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648363.091635773] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648363.134728825] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648363.295557743] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648363.306776850] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648363.493311640] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648363.504150932] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648363.696985684] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648363.721297478] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648363.894800878] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648363.950796765] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648364.103553604] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648364.130850351] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648364.296863321] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648364.331083718] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648364.531057159] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648364.541639597] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648364.689058068] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648364.787109801] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648364.889879474] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648364.898608463] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648365.101277689] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648365.126787524] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648365.303941471] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648365.328020949] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648365.513649218] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648365.533331147] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648365.690303701] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648365.703106980] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648365.896241363] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648365.925991729] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648366.095052319] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648366.117599719] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648366.294753222] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648366.320547039] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648366.499599658] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648366.526226866] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648366.698324540] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648366.731001543] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648366.900772080] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648366.940498605] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648367.091707994] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648367.096517527] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648367.292843068] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648367.311560679] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648367.490998430] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648367.518958901] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648367.693387674] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648367.715836129] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648367.887868469] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648367.896313901] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648368.092298256] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648368.137616611] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648368.302166189] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648368.323186806] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648368.502081074] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
+[VVV_sm_node-24] [INFO] [1749648368.539292609] [VVV_sm_node]: TIMEOUT 3 REACHED
+[VVV_sm_node-24] [INFO] [1749648368.716340371] [VVV_sm_node]: Navigating to goal: 4.8 4.3...
