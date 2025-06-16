@@ -1,5 +1,5 @@
 # VeniVidiVici
-### Loïc Finette, Oussama Jaffal, Adnane Elhaouat
+### Loïc Finette, Oussama Jaffal, Adnane El Haouat
 Repository for the Robotics Competition Team “VeniVidiVici”
 
 ---
