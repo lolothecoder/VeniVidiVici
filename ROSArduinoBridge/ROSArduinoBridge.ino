@@ -138,64 +138,12 @@ int runCommand() {
   arg2 = atoi(argv2);
 
   switch(cmd) {
-    case GET_BAUDRATE:
-      Serial.println(BAUDRATE);
-      break;
-    case ANALOG_READ:
-      Serial.println(analogRead(arg1));
-      break;
-    case DIGITAL_READ:
-      Serial.println(digitalRead(arg1));
-      break;
-    case ANALOG_WRITE:
-      analogWrite(arg1, arg2);
-      Serial.println("OK");
-      break;
-    case DIGITAL_WRITE:
-      if (arg2 == 0) digitalWrite(arg1, LOW);
-      else if (arg2 == 1) digitalWrite(arg1, HIGH);
-      Serial.println("OK");
-      break;
-    case PIN_MODE:
-      if (arg2 == 0) pinMode(arg1, INPUT);
-      else if (arg2 == 1) pinMode(arg1, OUTPUT);
-      Serial.println("OK");
-      break;
-    case PING:
-      Serial.println(Ping(arg1));
-      break;
-
-#ifdef USE_SERVOS
-    case SERVO_WRITE:
-      servos[arg1].setTargetPosition(arg2);
-      Serial.println("OK");
-      break;
-    case SERVO_READ:
-      Serial.println(servos[arg1].getServo().read());
-      break;
-#endif
 
 #ifdef USE_BASE
     case READ_ENCODERS:
       Serial.print(readEncoder(LEFT));
       Serial.print(" ");
       Serial.println(readEncoder(RIGHT));
-      break;
-    case RESET_ENCODERS:
-      resetEncoders();
-      resetPID();
-      Serial.println("OK");
-      break;
-    case MOTOR_SPEEDS:
-      lastMotorCommand = millis();
-      if (arg1 == 0 && arg2 == 0) {
-        setMotorSpeeds(0, 0);
-        resetPID();
-        moving = 0;
-      } else moving = 1;
-      leftPID.TargetTicksPerFrame  = arg1;
-      rightPID.TargetTicksPerFrame = arg2;
-      Serial.println("OK");
       break;
     case MOTOR_RAW_PWM:
       lastMotorCommand = millis();
@@ -265,17 +213,6 @@ int runCommand() {
       //Serial.print(g_y);
       //Serial.print(" ");
       //Serial.println(g_z);
-      break;
-    case UPDATE_PID:
-      while ((str = strtok_r(p, ":", &p)) != '\0') {
-        pid_args[i] = atoi(str);
-        i++;
-      }
-      Kp = pid_args[0];
-      Kd = pid_args[1];
-      Ki = pid_args[2];
-      Ko = pid_args[3];
-      Serial.println("OK");
       break;
 #endif
 
@@ -398,48 +335,6 @@ void loop() {
     updatePID();
     nextPID += PID_INTERVAL;
   }
-
-/*
-  // 6) Stuck‐detection: poll A0 for edges
-  if(collector_activated){
-    unsigned long now = millis();
-  uint8_t currentA0 = digitalRead(ENCODER_A_PIN);
-  if (currentA0 != lastA0state) {
-    pulseCount++;
-    lastA0state = currentA0;
-  }
-
-
-  // 7) Every CHECK_WINDOW ms, evaluate pulse count
-  if (now - lastWindowTime >= CHECK_WINDOW) {
-    unsigned long pulsesInWindow = pulseCount - lastWindowPulseCount;
-    //Serial.println(pulsesInWindow);
-    if (pulsesInWindow < MIN_PULSES) {
-      // Stuck: schedule 2-second reversal
-      reverseUntil = now + REVERSE_DURATION;
-      if (!currentlyReversing) {
-        currentlyReversing = true;
-      }
-    }
-    // Reset window counters
-    lastWindowPulseCount = pulseCount;
-    lastWindowTime       = now;
-  }
-
-  // 8) Drive grabber based on stuck‐state or normal operation
-  if (now < reverseUntil) {
-    // Still reversing
-    setGrabberSpeed(-DEFAULT_GRABBER_SPEED);  // enable driver
-  } else {
-    // Normal forward operation (or resume)
-    if (currentlyReversing) {
-      currentlyReversing = false;
-      collector_activated = false;  // reset state
-    }  // ensure driver is enabled
-  }
-  
-  }
-*/
       // 3) Auto‐stop for drive motors
   if ((millis() - lastMotorCommand) > AUTO_STOP_INTERVAL) {
     setMotorSpeeds(0, 0);
